@@ -36,7 +36,6 @@ export function ColoringScreen({ navigation }: RootStackProps<'Coloring'>) {
       onBack={() => navigation.goBack()}
       backLabel="Creative World"
       backEmoji="🖌️"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -113,7 +112,6 @@ export function MyWorldCreatorScreen({ navigation }: RootStackProps<'MyWorldCrea
       onBack={() => navigation.goBack()}
       backLabel="Creative World"
       backEmoji="🖌️"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -221,7 +219,6 @@ export function StoryPlayScreen({ navigation }: RootStackProps<'StoryPlay'>) {
       onBack={() => navigation.goBack()}
       backLabel="Story World"
       backEmoji="📖"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -256,7 +253,7 @@ export function DailyAdventureScreen({ navigation }: RootStackProps<'DailyAdvent
 
   return (
     <WorldScene mood="soft">
-      <GameHeader title="Daily Adventure" onBack={() => navigation.goBack()} onHome={() => navigation.navigate('MainTabs' as never)} prompt="Daily adventure" backLabel="Creative World" backEmoji="🖌️" />
+      <GameHeader title="Daily Adventure" onBack={() => navigation.goBack()} prompt="Daily adventure" backLabel="Creative World" backEmoji="🖌️" />
       <View style={styles.page}>
         <WhiteStage>
           <Text style={styles.heading}>Today&apos;s missions</Text>
@@ -299,7 +296,7 @@ export function MysteryBoxScreen({ navigation }: RootStackProps<'MysteryBox'>) {
 
   return (
     <WorldScene mood="soft">
-      <GameHeader title="Mystery Box" onBack={() => navigation.goBack()} onHome={() => navigation.navigate('MainTabs' as never)} prompt="Tap to open" backLabel="Creative World" backEmoji="🖌️" />
+      <GameHeader title="Mystery Box" onBack={() => navigation.goBack()} prompt="Tap to open" backLabel="Creative World" backEmoji="🖌️" />
       <View style={styles.page}>
         <WhiteStage>
           <Pressable

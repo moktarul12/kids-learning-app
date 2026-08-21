@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,35 +7,53 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { RootStackProps } from '../navigation/types';
-import {
-  AppShell,
-  AppHeader,
-  ActivityCard,
-} from '../components/ui';
-import { LivingIcon } from '../components/KidAnimations';
-import { WORLDS, gamesForWorld } from '../data/catalog';
+import { AppShell, AppHeader, ActivityCard } from '../components/ui';
+import { WORLDS, gamesByKind, GameDef, GameKind } from '../data/catalog';
 import { BACKGROUNDS } from '../data/colorActivities';
-import { colors, fonts, radii, shadows, spacing } from '../theme';
+import { colors, fonts, shadows } from '../theme';
 import { speak } from '../services/voice';
 import { useProgress } from '../state/ProgressContext';
 
-/** World hub — ← My World pill · place title (no duplicate crumbs) */
+/** Shared Learning / Quiz layout for every world hub */
+const SECTION: Record<
+  GameKind,
+  { title: string; hint: string; emoji: string; wash: string }
+> = {
+  learn: {
+    title: 'Learning',
+    hint: 'Explore & discover',
+    emoji: '🌱',
+    wash: '#C8F0DC',
+  },
+  quiz: {
+    title: 'Quiz',
+    hint: 'Play & practice',
+    emoji: '⭐',
+    wash: '#F5DCC4',
+  },
+};
+
 export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>) {
   const world = WORLDS.find((w) => w.id === route.params.worldId)!;
-  const games = gamesForWorld(world.id);
+  const learn = gamesByKind(world.id, 'learn');
+  const quiz = gamesByKind(world.id, 'quiz');
   const { completedGames } = useProgress();
   const { width } = useWindowDimensions();
 
-  const gap = 12;
-  const padH = spacing.lg;
-  const cols = 3;
-  const tileW = (width - padH * 2 - gap * (cols - 1)) / cols;
-  const firstGame = games[0];
+  const gap = 10;
+  const padH = 16;
+  const zonePad = 12;
   const bg = world.id === 'color' ? BACKGROUNDS.colorWorld : BACKGROUNDS.myWorld;
 
-  const openGame = (routeName: string, title: string) => {
-    speak(title);
-    navigation.navigate(routeName as never);
+  const openGame = (g: GameDef) => {
+    speak(g.title);
+    navigation.navigate(g.route as never);
+  };
+
+  const tileW = (count: number) => {
+    const cols = count <= 1 ? 1 : count === 2 ? 2 : 3;
+    const inner = width - padH * 2 - zonePad * 2;
+    return (inner - gap * (cols - 1)) / cols;
   };
 
   return (
@@ -46,102 +63,135 @@ export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>
         titleEmoji={world.emoji}
         left="back"
         backTo={{
-          label: 'My World',
-          emoji: '🌐',
+          label: 'Back',
           onPress: () => navigation.goBack(),
         }}
-        trail={[
-          {
-            label: 'My World',
-            emoji: '🌐',
-            onPress: () => navigation.goBack(),
-          },
-        ]}
       />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scroll, { paddingHorizontal: padH }]}
       >
-        <Pressable
-          style={[styles.featured, shadows.card]}
-          onPress={() => firstGame && openGame(firstGame.route, firstGame.title)}
-        >
-          <View style={[styles.featuredIcon, { backgroundColor: world.color + '28' }]}>
-            <LivingIcon motion="bob">
-              <Text style={{ fontSize: 48 }}>{world.emoji}</Text>
-            </LivingIcon>
-          </View>
-          <View style={styles.featuredCopy}>
-            <Text style={styles.featuredTitle}>{world.subtitle}</Text>
-            <Text style={styles.featuredSub}>Learn {world.title.toLowerCase()} in a fun way!</Text>
-          </View>
-          <View style={[styles.playBtn, { backgroundColor: world.color }]}>
-            <Text style={styles.playArrow}>›</Text>
-          </View>
-        </Pressable>
+        {learn.length > 0 ? (
+          <Zone
+            kind="learn"
+            games={learn}
+            completedGames={completedGames}
+            tileW={tileW(learn.length)}
+            gap={gap}
+            onOpen={openGame}
+          />
+        ) : null}
 
-        <View style={[styles.grid, { columnGap: gap, rowGap: gap }]}>
-          {games.map((g) => (
-            <ActivityCard
-              key={g.id}
-              title={g.title}
-              emoji={g.emoji}
-              tint={world.color}
-              width={tileW}
-              done={completedGames.includes(g.id)}
-              onPress={() => openGame(g.route, g.title)}
-            />
-          ))}
-        </View>
+        {quiz.length > 0 ? (
+          <Zone
+            kind="quiz"
+            games={quiz}
+            completedGames={completedGames}
+            tileW={tileW(quiz.length)}
+            gap={gap}
+            onOpen={openGame}
+          />
+        ) : null}
       </ScrollView>
     </AppShell>
   );
 }
 
+function Zone({
+  kind,
+  games,
+  completedGames,
+  tileW,
+  gap,
+  onOpen,
+}: {
+  kind: GameKind;
+  games: GameDef[];
+  completedGames: string[];
+  tileW: number;
+  gap: number;
+  onOpen: (g: GameDef) => void;
+}) {
+  const meta = SECTION[kind];
+  const done = games.filter((g) => completedGames.includes(g.id)).length;
+
+  return (
+    <View style={[styles.zone, { backgroundColor: meta.wash }, shadows.soft]}>
+      <View style={styles.zoneHead}>
+        <Text style={styles.zoneEmoji}>{meta.emoji}</Text>
+        <View style={styles.zoneHeadCopy}>
+          <Text style={styles.zoneTitle}>{meta.title}</Text>
+          <Text style={styles.zoneHint}>{meta.hint}</Text>
+        </View>
+        <View style={styles.progressCircle}>
+          <Text style={styles.progressText}>
+            {done}/{games.length}
+          </Text>
+        </View>
+      </View>
+
+      <View style={[styles.grid, { columnGap: gap, rowGap: gap }]}>
+        {games.map((g) => (
+          <ActivityCard
+            key={g.id}
+            title={g.title}
+            emoji={g.emoji}
+            tint={kind === 'learn' ? '#7ED957' : '#FF9A3C'}
+            width={tileW}
+            done={completedGames.includes(g.id)}
+            onPress={() => onOpen(g)}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  scroll: { paddingBottom: 28 },
-  featured: {
+  scroll: { paddingBottom: 36, gap: 14 },
+  zone: {
+    borderRadius: 28,
+    paddingTop: 14,
+    paddingBottom: 14,
+    paddingHorizontal: 12,
+  },
+  zoneHead: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: radii.card,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    marginBottom: 16,
-    gap: 12,
+    gap: 8,
+    marginBottom: 12,
   },
-  featuredIcon: {
-    width: 76,
-    height: 76,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featuredCopy: { flex: 1 },
-  featuredTitle: {
+  zoneEmoji: { fontSize: 26 },
+  zoneHeadCopy: { flex: 1 },
+  zoneTitle: {
     fontFamily: fonts.heading,
-    fontSize: 18,
+    fontSize: 20,
     color: colors.darkText,
   },
-  featuredSub: {
+  zoneHint: {
     fontFamily: fonts.body,
-    fontSize: 13,
+    fontSize: 12,
     color: colors.secondaryText,
-    marginTop: 2,
+    marginTop: 1,
   },
-  playBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  progressCircle: {
+    minWidth: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 8,
+    ...shadows.soft,
   },
-  playArrow: {
-    color: colors.white,
-    fontSize: 28,
-    fontFamily: fonts.heading,
-    lineHeight: 30,
-    marginLeft: 2,
+  progressText: {
+    fontFamily: fonts.label,
+    fontSize: 13,
+    color: colors.darkText,
   },
-  grid: { flexDirection: 'row', flexWrap: 'wrap' },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
 });

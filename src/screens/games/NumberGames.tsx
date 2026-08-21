@@ -29,7 +29,6 @@ export function NumberIntroScreen({ navigation }: RootStackProps<'NumberIntro'>)
       onBack={() => navigation.goBack()}
       backLabel="Number World"
       backEmoji="🔢"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -68,7 +67,6 @@ export function CountObjectsScreen({ navigation }: RootStackProps<'CountObjects'
       onBack={() => navigation.goBack()}
       backLabel="Number World"
       backEmoji="🔢"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -120,7 +118,6 @@ export function CountCollectScreen({ navigation }: RootStackProps<'CountCollect'
       onBack={() => navigation.goBack()}
       backLabel="Number World"
       backEmoji="🔢"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -178,7 +175,6 @@ export function BeforeAfterScreen({ navigation }: RootStackProps<'BeforeAfter'>)
       onBack={() => navigation.goBack()}
       backLabel="Number World"
       backEmoji="🔢"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -217,7 +213,6 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
       onBack={() => navigation.goBack()}
       backLabel="Number World"
       backEmoji="🔢"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -261,7 +256,6 @@ export function NumberTrainScreen({ navigation }: RootStackProps<'NumberTrain'>)
       onBack={() => navigation.goBack()}
       backLabel="Number World"
       backEmoji="🔢"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -316,7 +310,6 @@ export function MoreLessScreen({ navigation }: RootStackProps<'MoreLess'>) {
       onBack={() => navigation.goBack()}
       backLabel="Number World"
       backEmoji="🔢"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}

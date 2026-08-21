@@ -16,7 +16,6 @@ type Props = {
   progressCurrent?: number;
   progressTotal?: number;
   onBack: () => void;
-  onHome?: () => void;
   onSpeak?: () => void;
   children: React.ReactNode;
   showReward: boolean;
@@ -31,7 +30,7 @@ type Props = {
   backTo?: HeaderBackTo;
 };
 
-/** Activity frame: soft park · labeled back · white stage · progress */
+/** Activity frame: soft park · back arrow · white stage · progress */
 export function GameShell({
   title,
   prompt,
@@ -40,7 +39,6 @@ export function GameShell({
   progressCurrent,
   progressTotal = 10,
   onBack,
-  onHome,
   onSpeak,
   children,
   showReward,
@@ -61,7 +59,6 @@ export function GameShell({
         <GameHeader
           title={title}
           onBack={onBack}
-          onHome={onHome}
           prompt={prompt}
           onSpeak={onSpeak}
           round={round}

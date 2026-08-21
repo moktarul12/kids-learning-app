@@ -61,32 +61,6 @@ export function IconButton({
   );
 }
 
-/** Kid-friendly “go back to …” pill — reads clearer than ⌂ / bare ← */
-export function BackPill({
-  label,
-  onPress,
-  emoji,
-}: {
-  label: string;
-  onPress: () => void;
-  emoji?: string;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityLabel={`Back to ${label}`}
-      hitSlop={6}
-      style={({ pressed }) => [styles.backPill, { opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] }]}
-    >
-      <Text style={styles.backPillArrow}>←</Text>
-      {emoji ? <Text style={styles.backPillEmoji}>{emoji}</Text> : null}
-      <Text style={styles.backPillLabel} numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 /* ───────── RewardCounter (Me page body only — not in header) ───────── */
 export function RewardCounter({
   stars,
@@ -116,9 +90,9 @@ export type HeaderRight = 'speaker' | 'none';
 export type HeaderBackTo = { label: string; onPress: () => void; emoji?: string };
 
 /**
- * Two-line header (matches UX clarity):
- *   Line 1 — ← / avatar · Title · Round · speaker
- *   Line 2 — navigation trail (My World › Number World)
+ * Single-row header:
+ *   ← / avatar · Title · Round · speaker
+ * Back arrow alone handles navigation (no breadcrumb trail).
  */
 export function AppHeader({
   title,
@@ -127,7 +101,6 @@ export function AppHeader({
   left = 'avatar',
   right = 'none',
   backTo,
-  trail,
   onLeftPress,
   onRightPress,
 }: {
@@ -136,15 +109,12 @@ export function AppHeader({
   titleEmoji?: string;
   left?: HeaderLeft;
   right?: HeaderRight;
-  /** Immediate parent — used for ← on line 1 and as trail fallback on line 2 */
+  /** Previous place — drives the ← button only */
   backTo?: HeaderBackTo;
-  /** Full path for line 2 (parents only; current page is the title) */
-  trail?: HeaderBackTo[];
   onLeftPress?: () => void;
   onRightPress?: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  const navTrail = trail?.length ? trail : backTo ? [backTo] : [];
   const goBack = backTo?.onPress ?? onLeftPress;
   const showBack = Boolean(goBack) && left !== 'avatar';
 
@@ -168,7 +138,6 @@ export function AppHeader({
 
   return (
     <View style={[styles.appHeaderWrap, { paddingTop: Math.max(insets.top, 8) + 4 }]}>
-      {/* Line 1 — controls + title */}
       <View style={styles.appHeaderRow}>
         {leftSlot}
         <View style={styles.appHeaderMid}>
@@ -182,27 +151,6 @@ export function AppHeader({
         </View>
         {rightSlot}
       </View>
-
-      {/* Line 2 — navigation trail */}
-      {navTrail.length > 0 ? (
-        <View style={styles.navTrailRow}>
-          {navTrail.map((step, i) => (
-            <React.Fragment key={`${step.label}-${i}`}>
-              {i > 0 ? <Text style={styles.navTrailSep}>›</Text> : null}
-              <Pressable
-                onPress={step.onPress}
-                accessibilityLabel={`Go to ${step.label}`}
-                style={({ pressed }) => [styles.navTrailChip, { opacity: pressed ? 0.85 : 1 }]}
-              >
-                {step.emoji ? <Text style={styles.navTrailEmoji}>{step.emoji}</Text> : null}
-                <Text style={styles.navTrailLabel} numberOfLines={1}>
-                  {step.label}
-                </Text>
-              </Pressable>
-            </React.Fragment>
-          ))}
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -212,19 +160,17 @@ export function HubScreenHeader({ title }: { title: string; showAvatar?: boolean
   return <AppHeader title={title} left="avatar" right="none" />;
 }
 
-/** Activity pages — line 1 title/actions · line 2 trail */
+/** Activity pages — ← · title · speaker */
 export function ActivityHeader({
   title,
   round,
   onSpeak,
   backTo,
-  trail,
 }: {
   title: string;
   round?: number;
   onSpeak?: () => void;
   backTo: HeaderBackTo;
-  trail?: HeaderBackTo[];
 }) {
   return (
     <AppHeader
@@ -233,7 +179,6 @@ export function ActivityHeader({
       left="back"
       right="speaker"
       backTo={backTo}
-      trail={trail}
       onRightPress={onSpeak}
     />
   );
@@ -450,34 +395,6 @@ const styles = StyleSheet.create({
   },
   iconBtnText: { fontSize: 22, color: colors.white },
 
-  backPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    maxWidth: 132,
-    backgroundColor: colors.white,
-    borderRadius: radii.pill,
-    paddingVertical: 8,
-    paddingLeft: 10,
-    paddingRight: 12,
-    gap: 4,
-    borderWidth: 2,
-    borderColor: colors.primaryBlue,
-    ...shadows.soft,
-  },
-  backPillArrow: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.primaryBlue,
-    lineHeight: 18,
-  },
-  backPillEmoji: { fontSize: 14 },
-  backPillLabel: {
-    fontFamily: fonts.label,
-    fontSize: 12,
-    color: colors.darkText,
-    flexShrink: 1,
-  },
-
   rewards: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   pill: {
     flexDirection: 'row',
@@ -593,38 +510,6 @@ const styles = StyleSheet.create({
     marginTop: 1,
     textAlign: 'center',
   },
-  navTrailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: 'rgba(255,255,255,0.72)',
-    borderRadius: radii.pill,
-    alignSelf: 'center',
-    maxWidth: '100%',
-  },
-  navTrailChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  navTrailEmoji: { fontSize: 14 },
-  navTrailLabel: {
-    fontFamily: fonts.label,
-    fontSize: 13,
-    color: colors.primaryBlue,
-  },
-  navTrailSep: {
-    fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.secondaryText,
-    marginHorizontal: 2,
-  },
 
   hubHeader: {
     flexDirection: 'row',
@@ -688,31 +573,33 @@ const styles = StyleSheet.create({
 
   activityCard: {
     backgroundColor: colors.white,
-    borderRadius: radii.card,
-    paddingTop: 14,
-    paddingBottom: 10,
+    borderRadius: 22,
+    paddingTop: 16,
+    paddingBottom: 12,
     paddingHorizontal: 6,
     alignItems: 'center',
-    minHeight: 118,
+    minHeight: 124,
   },
   activityBubble: {
-    width: 78,
-    height: 78,
-    borderRadius: 22,
+    width: 70,
+    height: 70,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
   },
   doneBadge: {
     position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    top: -4,
+    right: -4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: colors.green,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.white,
   },
   doneText: { color: colors.white, fontSize: 12, fontFamily: fonts.heading },
   activityLabel: {
@@ -720,7 +607,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.darkText,
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 15,
   },
 
   answerCard: {

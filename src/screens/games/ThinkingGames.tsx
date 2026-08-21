@@ -49,7 +49,6 @@ export function MemoryGameScreen({ navigation }: RootStackProps<'MemoryGame'>) {
       onBack={() => navigation.goBack()}
       backLabel="Thinking World"
       backEmoji="💡"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -93,7 +92,6 @@ export function OddOneOutScreen({ navigation }: RootStackProps<'OddOneOut'>) {
       onBack={() => navigation.goBack()}
       backLabel="Thinking World"
       backEmoji="💡"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -135,7 +133,6 @@ export function PatternGameScreen({ navigation }: RootStackProps<'PatternGame'>)
       onBack={() => navigation.goBack()}
       backLabel="Thinking World"
       backEmoji="💡"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -177,7 +174,6 @@ export function SequenceGameScreen({ navigation }: RootStackProps<'SequenceGame'
       onBack={() => navigation.goBack()}
       backLabel="Thinking World"
       backEmoji="💡"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -228,7 +224,6 @@ export function SortCategoryScreen({ navigation }: RootStackProps<'SortCategory'
       onBack={() => navigation.goBack()}
       backLabel="Thinking World"
       backEmoji="💡"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}

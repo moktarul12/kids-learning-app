@@ -43,7 +43,6 @@ export function FindShapeScreen({ navigation }: RootStackProps<'FindShape'>) {
       onBack={() => navigation.goBack()}
       backLabel="Shape World"
       backEmoji="🔷"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -104,7 +103,6 @@ export function MatchShapeScreen({ navigation }: RootStackProps<'MatchShape'>) {
       onBack={() => navigation.goBack()}
       backLabel="Shape World"
       backEmoji="🔷"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -172,7 +170,6 @@ export function ShapePuzzleScreen({ navigation }: RootStackProps<'ShapePuzzle'>)
       onBack={() => navigation.goBack()}
       backLabel="Shape World"
       backEmoji="🔷"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -230,7 +227,6 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
       onBack={() => navigation.goBack()}
       backLabel="Shape World"
       backEmoji="🔷"
-      onHome={() => navigation.navigate('MainTabs' as never)}
       showReward={showReward}
       onNext={playNext}
       streak={streak}

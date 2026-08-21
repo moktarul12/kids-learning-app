@@ -28,7 +28,6 @@ function ActivityFrame({
   round,
   prompt,
   onBack,
-  onHome,
   onSpeak,
   progressCurrent,
   progressTotal = 10,
@@ -42,7 +41,6 @@ function ActivityFrame({
   round: number;
   prompt: string;
   onBack: () => void;
-  onHome: () => void;
   onSpeak: () => void;
   progressCurrent: number;
   progressTotal?: number;
@@ -57,11 +55,7 @@ function ActivityFrame({
         title={title}
         round={round}
         onSpeak={onSpeak}
-        backTo={{ label: 'Color World', emoji: '🎨', onPress: onBack }}
-        trail={[
-          { label: 'My World', emoji: '🌐', onPress: onHome },
-          { label: 'Color World', emoji: '🎨', onPress: onBack },
-        ]}
+        backTo={{ label: 'Color World', onPress: onBack }}
       />
       <View style={styles.body}>
         <ContentStage>
@@ -97,7 +91,6 @@ export function LearnColorScreen({ navigation }: RootStackProps<'LearnColor'>) {
       round={round}
       prompt={prompt}
       onBack={() => navigation.goBack()}
-      onHome={() => navigation.navigate('MainTabs' as never)}
       onSpeak={() => speak(`This is ${step.name}`)}
       progressCurrent={idx + 1}
       progressTotal={LEARN_COLOR_STEPS.length}
@@ -172,7 +165,6 @@ export function FindColorScreen({ navigation }: RootStackProps<'FindColor'>) {
       round={round}
       prompt={activity.prompt}
       onBack={() => navigation.goBack()}
-      onHome={() => navigation.navigate('MainTabs' as never)}
       onSpeak={() => speak(activity.title)}
       progressCurrent={progress}
       progressTotal={Math.min(3, correctNeeded)}
@@ -239,7 +231,6 @@ export function SortColorScreen({ navigation }: RootStackProps<'SortColor'>) {
       round={round}
       prompt="🧺 Sort into baskets"
       onBack={() => navigation.goBack()}
-      onHome={() => navigation.navigate('MainTabs' as never)}
       onSpeak={() => speak('Sort into baskets')}
       progressCurrent={6 - queue.length}
       progressTotal={6}
@@ -304,7 +295,6 @@ export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
       round={round}
       prompt="🔗 Match the colors"
       onBack={() => navigation.goBack()}
-      onHome={() => navigation.navigate('MainTabs' as never)}
       onSpeak={() => speak('Match the colors')}
       progressCurrent={matched.length}
       progressTotal={pairs.length}
@@ -372,7 +362,6 @@ export function MixColorScreen({ navigation }: RootStackProps<'MixColor'>) {
       round={round}
       prompt={`🧪 ${mix.a.name} + ${mix.b.name}`}
       onBack={() => navigation.goBack()}
-      onHome={() => navigation.navigate('MainTabs' as never)}
       onSpeak={() => speak(`${mix.a.name} plus ${mix.b.name} makes ${mix.label}`)}
       progressCurrent={step + 1}
       progressTotal={mixes.length}
