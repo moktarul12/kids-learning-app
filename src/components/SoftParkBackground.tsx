@@ -36,10 +36,19 @@ export function SoftParkBackground({ children }: { children: React.ReactNode }) 
       <View style={[styles.hill, styles.hillMid]} pointerEvents="none" />
       <View style={[styles.hill, styles.hillFront]} pointerEvents="none" />
 
-      {/* Tiny flowers */}
-      <View style={[styles.flower, { left: '12%', bottom: 52, backgroundColor: '#FF8AB8' }]} />
-      <View style={[styles.flower, { left: '28%', bottom: 44, backgroundColor: '#FFD54F' }]} />
-      <View style={[styles.flower, { right: '18%', bottom: 48, backgroundColor: '#FF6B6B' }]} />
+      {/* Tiny flowers (decorative only — never steal taps) */}
+      <View
+        pointerEvents="none"
+        style={[styles.flower, { left: '12%', bottom: 52, backgroundColor: '#FF8AB8' }]}
+      />
+      <View
+        pointerEvents="none"
+        style={[styles.flower, { left: '28%', bottom: 44, backgroundColor: '#FFD54F' }]}
+      />
+      <View
+        pointerEvents="none"
+        style={[styles.flower, { right: '18%', bottom: 48, backgroundColor: '#FF6B6B' }]}
+      />
 
       {children}
     </View>

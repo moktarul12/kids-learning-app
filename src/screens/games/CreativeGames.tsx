@@ -89,19 +89,43 @@ export function ColoringScreen({ navigation }: RootStackProps<'Coloring'>) {
 
 const STICKERS = ['🌳', '🏠', '🐶', '🚗', '☁️', '🌈', '☀️', '🌸', '🦊', '🏰'];
 
+type SceneSticker = { emoji: string; x: number; y: number; id: string };
+
 export function MyWorldCreatorScreen({ navigation }: RootStackProps<'MyWorldCreator'>) {
-  const [scene, setScene] = useState<{ emoji: string; x: number; y: number; id: number }[]>([]);
+  const [scene, setScene] = useState<SceneSticker[]>([]);
+  const [selected, setSelected] = useState<string | null>(STICKERS[0]);
   const [playing, setPlaying] = useState(false);
-  const prompt = 'Build your world';
+  const [canvasW, setCanvasW] = useState(300);
+  const [canvasH, setCanvasH] = useState(200);
+  const prompt = selected ? `Tap the sky to place ${selected}` : 'Pick a sticker, then tap the sky';
+
   const { showReward, celebrate, playNext, streak, round } = useGameSession({
     gameId: 'my_world',
     skill: 'creativity',
-    prompt,
+    prompt: 'Build your world',
   });
+
   useEffect(() => {
     setScene([]);
     setPlaying(false);
+    setSelected(STICKERS[0]);
+    speak('Pick a sticker, then tap the sky');
   }, [round]);
+
+  const placeAt = (x: number, y: number) => {
+    if (!selected) {
+      speak('Pick a sticker first');
+      return;
+    }
+    const size = 44;
+    const px = Math.max(4, Math.min(x - size / 2, canvasW - size));
+    const py = Math.max(4, Math.min(y - size / 2, canvasH - size));
+    setScene((sc) => [
+      ...sc,
+      { emoji: selected, x: px, y: py, id: `${Date.now()}-${Math.random()}` },
+    ]);
+    speak('Added!');
+  };
 
   return (
     <GameShell
@@ -117,54 +141,113 @@ export function MyWorldCreatorScreen({ navigation }: RootStackProps<'MyWorldCrea
       streak={streak}
       rewardMessage="World saved!"
     >
-      <View style={styles.scene}>
-        {scene.map((s, idx) => (
-          <Text
-            key={s.id}
-            style={[styles.sticker, { left: s.x, top: playing ? s.y - (idx % 3) * 8 : s.y }]}
-          >
-            {s.emoji}
-          </Text>
-        ))}
-        {!scene.length && <Text style={styles.empty}>Tap stickers below</Text>}
-      </View>
-      <View style={styles.tray}>
-        {STICKERS.map((emoji) => (
-          <Pressable
-            key={emoji}
-            style={styles.trayItem}
-            onPress={() => {
-              speak('Added!');
-              setScene((sc) => [
-                ...sc,
+      <View style={styles.worldStage}>
+        <View style={styles.worldBanner}>
+          <LivingIcon motion="bob">
+            <Text style={styles.worldHero}>🌍</Text>
+          </LivingIcon>
+          <View style={styles.worldBannerCopy}>
+            <Text style={styles.worldBannerTitle}>Build your world</Text>
+            <Text style={styles.worldBannerSub}>
+              {selected ? `1) ${selected} selected  ·  2) Tap the sky` : 'Tap a sticker below first'}
+            </Text>
+          </View>
+          <View style={styles.worldCount}>
+            <Text style={styles.worldCountText}>{scene.length}</Text>
+          </View>
+        </View>
+
+        {/* Tap canvas to place — no drag needed */}
+        <Pressable
+          onLayout={(e) => {
+            setCanvasW(e.nativeEvent.layout.width);
+            setCanvasH(e.nativeEvent.layout.height);
+          }}
+          onPress={(e) => {
+            const { locationX, locationY } = e.nativeEvent;
+            placeAt(locationX, locationY);
+          }}
+          style={[styles.worldCanvas, playing && styles.worldCanvasPlay]}
+        >
+          {scene.map((s, idx) => (
+            <Pressable
+              key={s.id}
+              onPress={(ev) => {
+                ev.stopPropagation?.();
+                // Tap sticker to remove
+                setScene((sc) => sc.filter((x) => x.id !== s.id));
+                speak('Removed');
+              }}
+              style={[
+                styles.worldSticker,
                 {
-                  emoji,
-                  x: 16 + Math.random() * 200,
-                  y: 24 + Math.random() * 140,
-                  id: Date.now() + Math.random(),
+                  left: s.x,
+                  top: playing ? s.y - (idx % 3) * 6 : s.y,
                 },
-              ]);
-            }}
+              ]}
+              hitSlop={6}
+            >
+              <Text style={styles.worldStickerEmoji}>{s.emoji}</Text>
+            </Pressable>
+          ))}
+          {!scene.length ? (
+            <View style={styles.worldEmpty} pointerEvents="none">
+              <Text style={styles.worldEmptyEmoji}>{selected ?? '👆'}</Text>
+              <Text style={styles.worldEmptyText}>Tap here to place</Text>
+            </View>
+          ) : null}
+        </Pressable>
+
+        <Text style={styles.worldTrayHint}>
+          {selected ? `Selected ${selected} — tap sky to add · tap sticker to delete` : 'Choose a sticker'}
+        </Text>
+
+        <View style={styles.worldTray}>
+          {STICKERS.map((emoji) => {
+            const on = selected === emoji;
+            return (
+              <Pressable
+                key={emoji}
+                onPress={() => {
+                  setSelected(emoji);
+                  speak(emoji);
+                }}
+                style={[styles.worldTrayItem, on && styles.worldTrayItemOn]}
+              >
+                <Text style={styles.worldTrayEmoji}>{emoji}</Text>
+                {on ? <Text style={styles.worldTrayTap}>✓</Text> : null}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <View style={styles.worldActions}>
+          <Pressable
+            onPress={() => setPlaying((p) => !p)}
+            style={[styles.worldBtn, { backgroundColor: colors.teal }]}
           >
-            <Text style={{ fontSize: 26 }}>{emoji}</Text>
+            <Text style={styles.worldBtnText}>{playing ? 'Pause' : 'Play'}</Text>
           </Pressable>
-        ))}
-      </View>
-      <View style={styles.actions}>
-        <BigButton
-          label={playing ? 'Pause' : 'Play'}
-          onPress={() => setPlaying((p) => !p)}
-          color={colors.teal}
-          textColor="#FFF"
-          size="md"
-        />
-        <BigButton
-          label="Save"
-          onPress={() => celebrate('World saved!')}
-          color={colors.yellow}
-          size="md"
-          disabled={!scene.length}
-        />
+          <Pressable
+            onPress={() => {
+              setScene([]);
+              speak('Cleared');
+            }}
+            style={[styles.worldBtn, styles.worldBtnGhost]}
+          >
+            <Text style={[styles.worldBtnText, { color: colors.ink }]}>Clear</Text>
+          </Pressable>
+          <Pressable
+            disabled={!scene.length}
+            onPress={() => celebrate('World saved!')}
+            style={[
+              styles.worldBtn,
+              { backgroundColor: colors.yellow, opacity: scene.length ? 1 : 0.45 },
+            ]}
+          >
+            <Text style={[styles.worldBtnText, { color: colors.ink }]}>Save</Text>
+          </Pressable>
+        </View>
       </View>
     </GameShell>
   );
@@ -364,6 +447,127 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actions: { flexDirection: 'row', gap: 10 },
+  worldStage: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#E8F8FF',
+    borderRadius: 28,
+    borderWidth: 3,
+    borderColor: '#A8D8F8',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+  },
+  worldBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 18,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  worldHero: { fontSize: 36, lineHeight: 44 },
+  worldBannerCopy: { flex: 1 },
+  worldBannerTitle: { ...typography.title, fontSize: 17, color: colors.ink },
+  worldBannerSub: { ...typography.kidLabel, fontSize: 13, color: colors.inkMuted, marginTop: 2 },
+  worldCount: {
+    minWidth: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  worldCountText: { ...typography.title, fontSize: 16, color: '#FFF' },
+  worldCanvas: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#C8EAF8',
+    borderRadius: 22,
+    overflow: 'hidden',
+    position: 'relative',
+    borderWidth: 3,
+    borderColor: '#7EC8F5',
+  },
+  worldCanvasPlay: {
+    borderColor: colors.teal,
+  },
+  worldSticker: {
+    position: 'absolute',
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  worldStickerEmoji: { fontSize: 40, lineHeight: 48 },
+  worldEmpty: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  worldEmptyEmoji: { fontSize: 48, lineHeight: 56, opacity: 0.5 },
+  worldEmptyText: { ...typography.kidLabel, fontSize: 15, color: colors.inkMuted, marginTop: 6 },
+  worldTrayHint: {
+    ...typography.kidLabel,
+    fontSize: 13,
+    color: colors.inkMuted,
+    textAlign: 'center',
+  },
+  worldTray: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  worldTrayItem: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#FFF',
+    borderWidth: 3,
+    borderColor: '#D7E6F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  worldTrayItemOn: {
+    borderColor: colors.orange,
+    backgroundColor: '#FFF8E1',
+    transform: [{ scale: 1.06 }],
+  },
+  worldTrayEmoji: { fontSize: 30, lineHeight: 36 },
+  worldTrayTap: {
+    position: 'absolute',
+    top: 2,
+    right: 4,
+    fontSize: 12,
+    color: colors.orange,
+  },
+  worldActions: {
+    flexDirection: 'row',
+    gap: 8,
+    width: '100%',
+  },
+  worldBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  worldBtnGhost: {
+    backgroundColor: '#FFF',
+    borderWidth: 2,
+    borderColor: '#D7E6F7',
+  },
+  worldBtnText: {
+    ...typography.title,
+    fontSize: 16,
+    color: '#FFF',
+  },
   page: { flex: 1, padding: 12 },
   heading: { ...typography.title, fontSize: 22, textAlign: 'center', marginBottom: 8 },
   mission: {
