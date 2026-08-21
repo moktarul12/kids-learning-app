@@ -36,3 +36,13 @@ Bottom tabs: **World · Games · Create · Me**
 - AsyncStorage progress persistence
 - Fredoka + Nunito fonts
 - Reanimated / Gesture Handler ready
+
+## Android APK (GitHub Actions)
+
+Every push to `main` (and manual **Run workflow**) builds an installable APK:
+
+1. Open [Actions → Build Android APK](https://github.com/moktarul12/kids-learning-app/actions)
+2. Open the latest successful run
+3. Download the **kids-learning-app-apk** artifact
+
+You can also trigger it from the Actions tab → **Build Android APK** → **Run workflow**.
