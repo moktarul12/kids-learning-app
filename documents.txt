@@ -1,0 +1,1396 @@
+ Below is a **client-ready project document** you can also use as the **master prompt for AI-assisted design/development**.
+
+# Kids Learning & Creative Game App
+
+## Product Requirements & Development Plan
+
+### 1. Project Overview
+
+The proposed application is an interactive **learning and creativity platform for young children**, primarily targeting ages **3–6**.
+
+The application will teach foundational concepts such as:
+
+- Colors
+- Numbers
+- Counting
+- Before/after numbers
+- Number sequences
+- Shapes
+- Matching
+- Sorting
+- Patterns
+- Memory
+- Logic
+- Creativity
+- Story-based learning
+
+The application will **not feel like a traditional educational app**. Learning concepts will be embedded into games, interactive stories, creative activities, rewards, and challenges.
+
+### Core philosophy
+
+> **Play → Discover → Learn → Create → Reward → Repeat**
+
+The first version will focus exclusively on the **child experience**. Parent and administrator dashboards can be introduced in later phases.
+
+---
+
+# 2. Product Vision
+
+The goal is to create a digital environment where children learn fundamental concepts naturally through **play and exploration**.
+
+Instead of presenting:
+
+> "Question 1: What comes after 5?"
+
+the application should create an experience such as:
+
+> 🚂 **Help the Number Train!**
+> 4 → ? → 6
+> Put the missing train coach in the correct position.
+
+The child learns **5** without feeling like they are taking a test.
+
+---
+
+# 3. Target Audience
+
+### Primary
+
+Children aged:
+
+**3–6 years**
+
+### Suggested progression
+
+**Age 3–4**
+
+- Colors
+- Shapes
+- Matching
+- Counting 1–10
+- Big/small
+- Same/different
+- Simple patterns
+
+**Age 4–5**
+
+- Numbers 1–20
+- Before/after
+- Counting
+- Sorting
+- Patterns
+- Basic logic
+- Simple addition
+
+**Age 5–6**
+
+- Numbers 1–100
+- Number sequences
+- Addition/subtraction
+- Advanced patterns
+- Logic
+- Problem solving
+- Early reading/vocabulary
+
+---
+
+# 4. Platform
+
+### Phase 1
+
+- Android
+- iOS
+
+### Technology recommendation
+
+**Mobile:** React Native + Expo
+
+**Backend:** Node.js / NestJS
+
+**Database:** PostgreSQL
+
+**Storage:** Cloud object storage
+
+**API:** REST/GraphQL
+
+**Analytics:** Event-based analytics
+
+**AI:** AI services for personalization, voice and future image recognition
+
+---
+
+# 5. Application Structure
+
+The initial application contains **one user experience: the child view**.
+
+```text
+                    KIDS APP
+                       │
+                       ▼
+                 MY WORLD / HOME
+                       │
+       ┌───────────────┼────────────────┐
+       │               │                │
+       ▼               ▼                ▼
+   LEARNING          GAMES           CREATIVE
+       │               │                │
+       ├── Colors      ├── Memory       ├── Coloring
+       ├── Numbers     ├── Pattern      ├── Builder
+       ├── Shapes      ├── Logic        ├── My World
+       └── Thinking    └── Matching     └── Animation
+```
+
+---
+
+# 6. Navigation
+
+The application should have very simple navigation suitable for young children.
+
+### Bottom navigation
+
+```text
+🗺️ World
+🎮 Games
+🎨 Create
+🏆 Me
+```
+
+The UI should avoid complicated menus.
+
+---
+
+# 7. Page-Wise Functional Requirements
+
+## Page 1 — Splash Screen
+
+### Purpose
+
+Introduce the brand.
+
+### Elements
+
+- Application logo
+- Animated background
+- Mascot/illustration
+- Loading animation
+- Short sound effect
+
+### Behaviour
+
+After loading:
+
+`Splash → Welcome`
+
+---
+
+# Page 2 — Welcome Screen
+
+### Purpose
+
+Quick entry into the application.
+
+### Elements
+
+- Large illustration
+- "Let's Play & Learn!" message
+- Start button
+- Continue button if returning user
+
+### UX
+
+The child should reach the main experience within a few seconds.
+
+---
+
+# Page 3 — My World / Home ⭐⭐⭐⭐⭐
+
+This is the **primary application screen**.
+
+The screen should look like a colorful interactive world rather than a dashboard.
+
+### Learning areas
+
+🌈 Color World
+🔢 Number World
+🔷 Shape World
+🧠 Thinking World
+🎨 Creative World
+📖 Story World
+
+### Additional elements
+
+- Stars
+- Coins
+- Daily mission
+- Recent activity
+- Locked/unlocked areas
+
+### Example
+
+```text
+              🌈 MY WORLD
+
+      🏰                    🌳
+   NUMBER CASTLE        COLOR FOREST
+
+
+             ⭐
+        MY JOURNEY
+
+
+      🔷                    🧠
+   SHAPE WORLD          THINKING
+
+
+              🎨
+          CREATIVE WORLD
+```
+
+---
+
+# 8. Color Learning Module
+
+## Page 4 — Color World
+
+Display a visual world containing different color activities.
+
+### Levels
+
+- Red
+- Blue
+- Yellow
+- Green
+- Orange
+- Purple
+- Pink
+- Brown
+- Black
+- White
+
+---
+
+## Page 5 — Learn Colors
+
+Example:
+
+### RED
+
+Show:
+
+🍎 ❤️ 🚗 🎈
+
+Voice:
+
+> "This is red."
+
+The child can tap objects.
+
+Objects should animate when selected.
+
+---
+
+## Page 6 — Find the Color
+
+Example:
+
+> **Find RED**
+
+Display multiple colored objects.
+
+Correct selection:
+
+- Animation
+- Sound
+- Stars
+
+Incorrect selection:
+
+- Friendly visual hint
+- No negative/shaming feedback
+
+---
+
+## Page 7 — Color Sorting
+
+Two or more baskets.
+
+Example:
+
+🔴 RED
+🔵 BLUE
+
+Objects appear.
+
+Child drags objects to the appropriate basket.
+
+---
+
+## Page 8 — Color Matching
+
+Match colors with objects.
+
+Example:
+
+🔴 → 🍎
+
+🟢 → 🌳
+
+🟡 → ☀️
+
+---
+
+## Page 9 — Color Mixing
+
+Interactive activity:
+
+🔴 + 🟡 → 🟠
+
+🔵 + 🟡 → 🟢
+
+This introduces creativity and basic scientific concepts.
+
+---
+
+# 9. Number Learning Module
+
+## Page 10 — Number World
+
+Create a visually engaging number environment.
+
+Levels:
+
+- 1–5
+- 1–10
+- 1–20
+- 1–50
+- 1–100
+
+Levels unlock progressively.
+
+---
+
+## Page 11 — Number Introduction
+
+Example:
+
+### 5
+
+Show:
+
+⭐⭐⭐⭐⭐
+
+The number appears with animation and voice.
+
+---
+
+## Page 12 — Count Objects
+
+Example:
+
+🍎 🍎 🍎 🍎
+
+Question:
+
+> "How many apples?"
+
+The child selects an answer.
+
+---
+
+## Page 13 — Count & Collect ⭐⭐⭐⭐⭐
+
+Example:
+
+> "Give the monster 5 apples."
+
+The child drags apples into the basket.
+
+After completion:
+
+🎉 Monster celebrates.
+
+---
+
+## Page 14 — Number Matching
+
+Match:
+
+**7**
+
+with:
+
+⭐⭐⭐⭐⭐⭐⭐
+
+---
+
+## Page 15 — Before Number
+
+Example:
+
+```text
+? → 5
+```
+
+Child chooses:
+
+3 / 4 / 6
+
+Correct answer:
+
+**4**
+
+---
+
+## Page 16 — After Number
+
+Example:
+
+```text
+5 → ?
+```
+
+Correct:
+
+**6**
+
+---
+
+## Page 17 — Missing Number
+
+Example:
+
+```text
+4 → ? → 6
+```
+
+Correct:
+
+**5**
+
+---
+
+## Page 18 — Number Train ⭐⭐⭐⭐⭐
+
+The child repairs a train.
+
+Example:
+
+```text
+🚂 1 → 2 → ? → 4 → 5
+```
+
+Child selects **3**.
+
+The train moves forward after completion.
+
+Difficulty increases progressively.
+
+---
+
+## Page 19 — More or Less
+
+Example:
+
+```text
+🍎🍎🍎🍎
+
+🍎🍎
+```
+
+Question:
+
+> Which has more?
+
+---
+
+# 10. Shape Learning Module
+
+## Page 20 — Shape World
+
+Shapes:
+
+- Circle
+- Square
+- Triangle
+- Rectangle
+- Star
+
+---
+
+## Page 21 — Find Shape
+
+> "Find all the triangles."
+
+---
+
+## Page 22 — Shape Matching
+
+Match shapes to real-world objects.
+
+Example:
+
+Circle → Ball
+
+Triangle → Roof
+
+Square → Window
+
+---
+
+## Page 23 — Shape Puzzle
+
+Complete an incomplete object.
+
+Example:
+
+🏠
+
+Child chooses the missing shape.
+
+---
+
+## Page 24 — Shape Builder ⭐⭐⭐⭐⭐
+
+Provide a toolbox:
+
+⭕ 🟥 🔺 ▭
+
+Child creates:
+
+- House
+- Car
+- Robot
+- Rocket
+- Animal
+
+This is both a learning and creativity activity.
+
+---
+
+# 11. Thinking & Logic Module
+
+## Page 25 — Thinking World
+
+Categories:
+
+- Memory
+- Matching
+- Sorting
+- Patterns
+- Sequence
+- Odd one out
+
+---
+
+## Page 26 — Memory Game
+
+Show objects temporarily.
+
+Hide them.
+
+Child identifies the requested object.
+
+Difficulty increases over time.
+
+---
+
+## Page 27 — Matching Game
+
+Find matching pairs.
+
+---
+
+## Page 28 — Odd One Out
+
+Example:
+
+🍎 🍎 🍎 🍌
+
+Child identifies the different object.
+
+---
+
+## Page 29 — Pattern Game
+
+Example:
+
+🔴 🔵 🔴 🔵 ?
+
+Correct:
+
+🔴
+
+Advanced:
+
+🔴 🔵 🟡 🔴 🔵 ?
+
+---
+
+## Page 30 — Sequence Game
+
+Example:
+
+🐣 → 🐥 → 🐔 → ?
+
+Child chooses the next stage.
+
+---
+
+## Page 31 — Sorting Game
+
+Sort objects based on:
+
+- Color
+- Shape
+- Size
+- Category
+- Quantity
+
+---
+
+# 12. Creative World
+
+## Page 32 — Creative World
+
+Main options:
+
+🎨 Coloring
+🏗️ Build
+🌎 My World
+✨ Animate
+
+---
+
+## Page 33 — Coloring
+
+Provide:
+
+- Canvas
+- Color palette
+- Eraser
+- Undo
+- Basic shapes
+- Brush sizes
+
+Objects:
+
+- Animals
+- Houses
+- Cars
+- Dinosaurs
+- Nature
+- Space
+
+---
+
+## Page 34 — Build With Shapes
+
+Child combines shapes freely.
+
+Example:
+
+```text
+🔺 + 🟥 + ⭕
+```
+
+Creates a rocket or house.
+
+The system can optionally recognize the created object.
+
+---
+
+## Page 35 — My World Creator ⭐⭐⭐⭐⭐
+
+Start with an empty environment.
+
+Child can add:
+
+🌳 Trees
+🏠 Houses
+🐶 Animals
+🚗 Cars
+☁️ Clouds
+🌈 Rainbow
+☀️ Sun
+
+---
+
+## Page 36 — Animate My World
+
+The child presses:
+
+▶️ **PLAY**
+
+Objects become animated.
+
+Examples:
+
+- Car drives
+- Dog walks
+- Clouds move
+- Sun moves
+- Birds fly
+
+This creates a strong emotional connection with the child's creation.
+
+---
+
+# 13. Story Learning
+
+## Page 37 — Story World
+
+Categories:
+
+- Animals
+- Adventure
+- Space
+- Friendship
+- Numbers
+- Colors
+- Shapes
+
+---
+
+## Page 38 — Interactive Story
+
+The child makes simple choices.
+
+Example:
+
+> Bunny found a door.
+
+Options:
+
+🔍 Open the door
+
+🏃 Go around the door
+
+The story changes based on the choice.
+
+---
+
+## Page 39 — Story + Learning
+
+Example:
+
+> Bunny found **3 apples**.
+
+Question:
+
+> "How many apples?"
+
+This combines storytelling and learning.
+
+---
+
+# 14. Daily Adventure
+
+## Page 40 — Daily Adventure ⭐⭐⭐⭐⭐
+
+Every day the child receives 3–5 short activities.
+
+Example:
+
+```text
+🌈 Find 3 red objects       ✓
+
+🔢 Count 5 stars             ✓
+
+🔷 Find 2 circles            ○
+
+🧠 Complete one puzzle       ○
+
+🎨 Create something          ○
+```
+
+Completing all activities unlocks:
+
+🎁 Mystery Reward
+
+---
+
+# 15. Rewards
+
+## Page 41 — Reward Screen
+
+After completing an activity:
+
+> 🎉 AMAZING!
+
+Rewards:
+
+- ⭐ Stars
+- 🪙 Coins
+- 💎 Gems
+- 🏅 Badges
+
+Rewards should reinforce learning without making the experience overly competitive.
+
+---
+
+## Page 42 — Mystery Box
+
+Child opens a reward box.
+
+Possible rewards:
+
+- Stickers
+- Hats
+- Backgrounds
+- Animals
+- Cars
+- Rockets
+- Decorations
+
+---
+
+# 16. Child Progress
+
+## Page 43 — My Learning Journey
+
+Keep it visual and simple.
+
+Example:
+
+```text
+🌈 Colors       ⭐⭐⭐⭐⭐
+
+🔢 Numbers      ⭐⭐⭐⭐
+
+🔷 Shapes       ⭐⭐⭐
+
+🧠 Thinking     ⭐⭐⭐⭐
+
+🎨 Creativity   ⭐⭐⭐⭐⭐
+```
+
+Avoid complicated educational reports.
+
+---
+
+# 17. Game Center
+
+## Page 44 — Games
+
+All games can be accessed here.
+
+### Numbers
+
+- Count
+- Match
+- Before
+- After
+- Missing Number
+- Number Train
+
+### Colors
+
+- Find Color
+- Sort Color
+- Match Color
+- Color Mixing
+
+### Shapes
+
+- Find Shape
+- Match Shape
+- Shape Puzzle
+- Shape Builder
+
+### Thinking
+
+- Memory
+- Pattern
+- Sorting
+- Sequence
+
+---
+
+# 18. Future AI Features
+
+These should preferably come after the core game engine is stable.
+
+## Page 45 — Voice Learning
+
+The app asks:
+
+> "What color is this?"
+
+Child answers:
+
+> "Red."
+
+System recognizes the answer and responds.
+
+This can eventually support:
+
+- Colors
+- Numbers
+- Shapes
+- Vocabulary
+- Pronunciation
+
+---
+
+## Page 46 — Camera Mission
+
+The app says:
+
+> 🔎 Find something BLUE!
+
+Child takes a picture.
+
+AI identifies the object/color.
+
+> 🎉 Great! You found something blue!
+
+---
+
+## Page 47 — Real-World Mission
+
+Examples:
+
+> Find 3 green objects.
+
+> Count 5 cars.
+
+> Find something shaped like a circle.
+
+> Find 2 big objects and 2 small objects.
+
+This connects digital learning with real-world exploration.
+
+---
+
+# 19. Game Engine — Important Technical Requirement
+
+The application should **not hard-code every game individually**.
+
+Create reusable game templates.
+
+### Example
+
+```text
+Game Template
+      │
+      ├── Question
+      ├── Objects
+      ├── Answers
+      ├── Animation
+      ├── Sound
+      ├── Difficulty
+      ├── Reward
+      └── Learning Concept
+```
+
+For example, the same **Drag & Drop engine** can power:
+
+- Color sorting
+- Number matching
+- Shape matching
+- Object classification
+- Before/after numbers
+
+This will significantly reduce development effort.
+
+---
+
+# 20. Learning Engine
+
+The application should record:
+
+- Games played
+- Correct answers
+- Incorrect answers
+- Attempts
+- Completion time
+- Difficulty
+- Concepts mastered
+
+Example:
+
+```text
+Child
+ ↓
+Plays Number Train
+ ↓
+5 attempts
+ ↓
+4 correct
+ ↓
+80% accuracy
+ ↓
+Learning engine
+ ↓
+Next activity selected
+```
+
+If the child struggles, the system provides easier activities.
+
+If the child consistently performs well, difficulty increases.
+
+---
+
+# 21. Gamification System
+
+### Rewards
+
+**Stars**
+
+- Earned after activities
+
+**Coins**
+
+- Used for customization
+
+**Badges**
+
+- Milestones
+
+**Unlockables**
+
+- Worlds
+- Stickers
+- Backgrounds
+- Decorations
+
+### Example
+
+```text
+Complete 5 color games
+        ↓
+⭐ Color Explorer Badge
+        ↓
+Unlock Rainbow Forest
+```
+
+---
+
+# 22. Audio & Animation
+
+Because the target audience is young children, audio is extremely important.
+
+Every important interaction should potentially have:
+
+- Voice instruction
+- Positive feedback
+- Correct-answer sound
+- Animation
+- Character reaction
+
+Avoid excessive text.
+
+The child should be able to understand most activities **without reading**.
+
+---
+
+# 23. UI/UX Design Guidelines
+
+### Must have
+
+- Large touch targets
+- Bright but controlled colors
+- Large illustrations
+- Minimal text
+- Voice instructions
+- Simple navigation
+- Friendly animations
+- Immediate feedback
+- Very short activities
+
+### Avoid
+
+- Complex menus
+- Long forms
+- Long instructions
+- Excessive text
+- Adult-looking dashboards
+- Negative messages such as "Wrong!"
+- Too many simultaneous elements
+
+Instead of:
+
+❌ "Incorrect Answer"
+
+Use:
+
+> "Almost! Try again! 😊"
+
+---
+
+# 24. MVP Scope
+
+I recommend **not building all 47 screens initially**.
+
+### MVP
+
+**Colors**
+
+- Learn Color
+- Find Color
+- Sorting
+- Matching
+
+**Numbers**
+
+- Introduction
+- Counting
+- Count & Collect
+- Matching
+- Before
+- After
+- Missing Number
+- Number Train
+
+**Shapes**
+
+- Learn Shapes
+- Find Shape
+- Matching
+- Shape Builder
+
+**Thinking**
+
+- Memory
+- Pattern
+- Sorting
+- Odd One Out
+
+**Creative**
+
+- Coloring
+- Shape Builder
+- Basic My World
+
+### MVP target
+
+**20–25 high-quality games/activities**
+
+rather than 100 basic activities.
+
+---
+
+# 25. Phase 2
+
+Add:
+
+- Interactive stories
+- Advanced creativity
+- Animation creator
+- Voice interaction
+- AI personalization
+- Daily missions
+- Camera recognition
+- More languages
+
+---
+
+# 26. Phase 3
+
+Add:
+
+- AI learning companion
+- Personalized learning paths
+- Advanced speech evaluation
+- Real-world missions
+- More age groups
+- Additional subjects
+- Parent dashboard
+- Subscription system
+- Content management platform
+
+---
+
+# 27. Recommended Technical Architecture
+
+```text
+                React Native / Expo
+                        │
+              ┌─────────┴─────────┐
+              │                   │
+          Game Engine         UI Layer
+              │                   │
+              └─────────┬─────────┘
+                        │
+                   API Gateway
+                        │
+                 Node.js / NestJS
+                        │
+       ┌────────────────┼────────────────┐
+       │                │                │
+  User Service     Game Service    Learning Engine
+       │                │                │
+       └────────────────┼────────────────┘
+                        │
+                   PostgreSQL
+                        │
+             ┌──────────┴──────────┐
+             │                     │
+          Redis                 Storage
+                                  │
+                             Audio/Images
+```
+
+---
+
+# 28. AI-Assisted Development Master Prompt
+
+Use the following as the **master prompt for your AI development/design team**:
+
+You are an expert product designer, UX designer, children's educational game designer, React Native engineer, Node.js engineer and software architect.
+
+We are building a mobile-first children's learning and creativity application for children approximately 3–6 years old.
+
+The application must feel like a fun game/adventure, NOT like a traditional school or worksheet application.
+
+CORE PRODUCT PHILOSOPHY:
+
+Play → Discover → Learn → Create → Reward → Repeat
+
+IMPORTANT PRODUCT CONSTRAINT:
+
+The initial version has ONLY the CHILD EXPERIENCE.
+
+Do not create a parent dashboard, teacher dashboard or admin dashboard in the initial child UI.
+
+The child should be able to open the application and immediately enter a colorful learning world.
+
+PRIMARY NAVIGATION:
+
+1. World
+2. Games
+3. Create
+4. Me
+
+MAIN LEARNING WORLDS:
+
+1. Color World
+2. Number World
+3. Shape World
+4. Thinking World
+5. Creative World
+6. Story World
+
+COLOR LEARNING:
+
+- Color introduction
+- Find the color
+- Color sorting
+- Color matching
+- Color mixing
+- Color-based puzzles
+
+NUMBER LEARNING:
+
+- Number recognition
+- Counting
+- Count and collect
+- Number matching
+- Before number
+- After number
+- Missing number
+- Number sequence
+- Number train
+- More and less
+
+SHAPE LEARNING:
+
+- Shape introduction
+- Find shape
+- Shape matching
+- Shape puzzles
+- Shape builder
+- Build objects using shapes
+
+THINKING AND LOGIC:
+
+- Memory
+- Matching
+- Odd one out
+- Patterns
+- Sequence
+- Sorting
+- Classification
+- Simple logic puzzles
+
+CREATIVE LEARNING:
+
+- Coloring
+- Free drawing
+- Shape building
+- Create My World
+- Add objects to the world
+- Animate created objects
+
+STORY LEARNING:
+
+- Interactive stories
+- Child choices
+- Number-based stories
+- Color-based stories
+- Shape-based stories
+- Simple problem-solving stories
+
+GAMIFICATION:
+
+Use:
+
+- Stars
+- Coins
+- Gems
+- Badges
+- Unlockable worlds
+- Stickers
+- Decorations
+- Mystery rewards
+
+Do not use aggressive competition or negative feedback.
+
+Instead of "Wrong", use friendly feedback such as:
+
+"Almost! Try again!"
+
+"Great thinking!"
+
+"Let's try one more time!"
+
+"Fantastic!"
+
+DAILY ADVENTURE:
+
+Provide a small set of daily activities such as:
+
+- Find 3 red objects
+- Count 5 objects
+- Complete a number sequence
+- Find a shape
+- Complete a puzzle
+- Create something
+
+The child receives a reward after completing the daily adventure.
+
+
+
+MOBILE
+React Native
+Expo
+TypeScript
+
+ANIMATION
+Rive
+Lottie
+Reanimated
+Gesture Handler
+Skia
+
+AUDIO
+AI Text-to-Speech
+Speech-to-Text
+Audio caching
+Sound effects
+Music
+
+AI
+LLM
+AI Voice
+Speech Recognition

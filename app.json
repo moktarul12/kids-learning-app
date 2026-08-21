@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "KIDS Play Learn Create",
+    "slug": "kids-learning-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5EC8F2"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kids.playlearncreate"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#5EC8F2",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.kids.playlearncreate",
+      "versionCode": 1,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-splash-screen"
+    ]
+  }
+}

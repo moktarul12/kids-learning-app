@@ -1,0 +1,75 @@
+/** Design tokens from requirement/plan.txt */
+export const colors = {
+  primaryBlue: '#4DA3FF',
+  lightBlue: '#E8F4FF',
+  primaryRed: '#FF5252',
+  green: '#7ED957',
+  darkText: '#1E2A3A',
+  secondaryText: '#6B7280',
+  white: '#FFFFFF',
+
+  // Accents
+  yellow: '#FFD93D',
+  orange: '#FF9A3C',
+  purple: '#9B7BFF',
+  pink: '#FF7AB8',
+  teal: '#2EC4B6',
+  brown: '#C68642',
+  star: '#FFC107',
+  coin: '#F5C518',
+  gem: '#FF6BA8',
+  success: '#7ED957',
+  warn: '#FFB020',
+
+  // Surfaces
+  stage: '#FFFFFF',
+  stageSoft: '#F7FBFF',
+  line: '#E6EEF6',
+  ink: '#1E2A3A',
+  inkMuted: '#6B7280',
+  inkSoft: '#6B7280',
+
+  // Compat aliases used across app
+  headerBlue: '#4DA3FF',
+  blue: '#4DA3FF',
+  red: '#FF5252',
+  coral: '#FF5252',
+  lime: '#7ED957',
+  nav: '#FFFFFF',
+  navActive: '#4DA3FF',
+  navIdle: '#A0ADC0',
+  navInactive: '#A0ADC0',
+  navBg: '#FFFFFF',
+  skyDeep: '#4DA3FF',
+  sky: '#7EC8F5',
+  skyLight: '#E8F4FF',
+  skyTop: '#4DA3FF',
+  skyMid: '#7EC8F5',
+  skyBottom: '#E8F4FF',
+  grass: '#7ED957',
+  grassNear: '#7ED957',
+  grassFar: '#5ECF5A',
+  grassDark: '#5ECF5A',
+  hill: '#7ED957',
+  sun: '#FFD93D',
+  cloud: '#FFFFFF',
+  cream: '#FFF8E7',
+  card: '#FFFFFF',
+  hint: '#FFB020',
+  badge: '#FF9A3C',
+  indigo: '#6C8CFF',
+  black: '#1E2A3A',
+} as const;
+
+export const learningColors = [
+  { id: 'red', name: 'Red', hex: '#FF5252', emoji: '🍎' },
+  { id: 'blue', name: 'Blue', hex: '#4DA3FF', emoji: '💧' },
+  { id: 'yellow', name: 'Yellow', hex: '#FFD93D', emoji: '☀️' },
+  { id: 'green', name: 'Green', hex: '#7ED957', emoji: '🌳' },
+  { id: 'orange', name: 'Orange', hex: '#FF9A3C', emoji: '🍊' },
+  { id: 'purple', name: 'Purple', hex: '#9B7BFF', emoji: '🍇' },
+  { id: 'pink', name: 'Pink', hex: '#FF7AB8', emoji: '🌸' },
+  { id: 'brown', name: 'Brown', hex: '#C68642', emoji: '🧸' },
+] as const;
+
+export type LearningColor = (typeof learningColors)[number];

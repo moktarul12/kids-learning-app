@@ -1,0 +1,96 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    name: Expo → Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Prebuild native Android project
+        run: npx expo prebuild --platform android --non-interactive --clean
+
+      - name: Use debug keystore for CI release APK
+        working-directory: android/app
+        run: |
+          # Expo release builds need a signingConfig; for CI artifacts use the
+          # Android debug keystore so the APK installs without extra secrets.
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path("build.gradle")
+          text = path.read_text()
+          if "signingConfig signingConfigs.debug" not in text:
+              import re
+              text2, n = re.subn(
+                  r"(release\s*\{)",
+                  r"\1\n            signingConfig signingConfigs.debug",
+                  text,
+                  count=1,
+              )
+              if n:
+                  path.write_text(text2)
+                  print("Patched release signingConfig → debug")
+              else:
+                  print("WARNING: could not patch release signing; trying assembleDebug fallback later")
+          else:
+              print("Release already uses debug signingConfig")
+          PY
+
+      - name: Build release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Locate APK
+        id: apk
+        run: |
+          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
+          if [ -z "$APK" ]; then
+            echo "No APK found"
+            find android/app/build/outputs -type f || true
+            exit 1
+          fi
+          cp "$APK" kids-learning-app.apk
+          echo "path=kids-learning-app.apk" >> "$GITHUB_OUTPUT"
+          ls -lh kids-learning-app.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kids-learning-app-apk
+          path: kids-learning-app.apk
+          if-no-files-found: error
+          retention-days: 30

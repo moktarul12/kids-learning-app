@@ -1,0 +1,325 @@
+Rebuild the attached children's color-learning app UI to match the provided reference design as closely as possible.
+
+IMPORTANT:
+This is not a generic redesign. Treat the reference images as the source of truth.
+The final implementation should visually match the reference at pixel level wherever practical.
+
+APP STYLE
+- Target: children ages 3–6
+- Bright, friendly, premium educational app
+- Soft pastel backgrounds
+- Rounded cards
+- Large touch targets
+- Playful 3D/emoji-style illustrations
+- Soft shadows
+- Clean spacing
+- Very simple navigation
+- No unnecessary UI elements
+- Mobile-first responsive design
+
+DESIGN SYSTEM
+
+Primary Blue: #4DA3FF
+Light Blue: #E8F4FF
+Primary Red: #FF5252
+Green: #7ED957
+Dark Text: #1E2A3A
+Secondary Text: #6B7280
+White: #FFFFFF
+
+Font:
+- Poppins
+- Heading weight: 700
+- Body weight: 500
+- Large children's labels: 700
+
+Border radius:
+- Main cards: 24px
+- Buttons: 28px
+- Small cards: 18–20px
+- Icon buttons: 20px
+
+Shadow:
+- Soft shadow
+- Approx: 0 8px 20px rgba(0,0,0,0.08)
+
+TARGET SCREENS
+
+1. FIND RED
+Header:
+- Home button left
+- "Find Red"
+- "Round 1"
+- Sound button right
+
+Main:
+- Large white rounded content card
+- "🔎 Find Red"
+- Large red circular target
+- 3-column answer grid
+- Heart
+- Frog
+- Butterfly
+- Tree
+- Sun
+- Grapes
+- Banana
+- Orange
+
+Bottom:
+- Progress indicator
+- Star/reward indicator
+
+Interaction:
+- Correct answer → celebration animation + progress update
+- Incorrect answer → gentle shake animation
+- Never punish the child
+- Large touch areas
+
+2. LEARN COLORS
+
+Header:
+- Back button
+- "Learn Colors"
+- "Round 1"
+- Sound button
+
+Content:
+- "🎨 This is Red"
+- Large red/apple illustration
+- Large RED button/card
+- Supporting choices:
+  heart
+  car
+  balloon
+- "Next Color" CTA
+- Round progress dots
+
+Correct interaction should trigger:
+- small celebration
+- sound
+- progress update
+
+3. COLOR WORLD
+
+Header:
+- Avatar
+- COLOR WORLD
+- Stars counter
+- Coin counter
+
+Hero:
+- Painter palette illustration
+- "Paint the forest"
+- Short subtitle
+- Arrow CTA
+
+Activity grid:
+- Learn Colors
+- Find Color
+- Color Sort
+- Color Match
+- Color Mix
+
+Bottom navigation:
+- World
+- Games
+- Create
+- Me
+
+Use the supplied colorful forest/rainbow background.
+
+4. MY WORLD
+
+Header:
+- Avatar
+- MY WORLD
+- Stars
+- Coins
+
+Six large world cards:
+
+Color World
+Number World
+Shape World
+Thinking World
+Creative World
+Story World
+
+Use large illustrations and very clear labels.
+
+Background:
+- Blue sky
+- Clouds
+- Rainbow
+- Green hills/bushes
+- Child-friendly illustration style
+
+BOTTOM NAVIGATION
+
+World
+Games
+Create
+Me
+
+Selected tab:
+- Blue
+- Stronger icon
+- Clear label
+
+Unselected:
+- Light gray/blue
+
+BACKGROUND ASSETS
+
+Use the supplied assets:
+
+bg_find_red.png
+bg_learn_colors.png
+bg_color_world.png
+bg_my_world.png
+
+Do NOT replace these with CSS gradients unless absolutely necessary.
+
+ASSET RULES
+
+Create reusable components:
+
+<AppShell />
+<Header />
+<IconButton />
+<WorldCard />
+<ActivityCard />
+<AnswerCard />
+<PrimaryButton />
+<ProgressIndicator />
+<BottomNavigation />
+<RewardCounter />
+
+Do not duplicate UI code between screens.
+
+DATA-DRIVEN ACTIVITIES
+
+Represent activities using data instead of hardcoded JSX.
+
+Example:
+
+{
+  title: "Find Red",
+  targetColor: "red",
+  options: [...],
+  correctAnswer: "red"
+}
+
+This should make it easy to add:
+- Find Blue
+- Find Yellow
+- Find Green
+- Find Orange
+- Find Purple
+
+ANIMATION
+
+Use subtle child-friendly animations:
+
+- Button press scale
+- Card bounce
+- Correct answer sparkle
+- Incorrect answer shake
+- Progress bar animation
+- Page transition
+- Reward/star animation
+
+Animations should be fast and smooth.
+Avoid excessive animation.
+
+ACCESSIBILITY
+
+- Minimum touch target: 44x44px
+- Prefer 48px+
+- Large readable text
+- Strong contrast
+- Do not rely only on color to indicate correctness
+- Support screen sizes from approximately 320px to 430px width
+
+TECHNICAL IMPLEMENTATION
+
+Use the existing project's technology and architecture.
+
+If React:
+- React
+- TypeScript
+- reusable components
+- clean component hierarchy
+
+If React Native:
+- React Native
+- reusable components
+- responsive dimensions
+- SafeAreaView
+- Pressable
+- Animated/Reanimated where appropriate
+
+Keep all design tokens in one location.
+
+Create:
+
+src/
+  components/
+  screens/
+  assets/
+  theme/
+  data/
+  navigation/
+
+THEME
+
+Create centralized:
+
+colors
+typography
+spacing
+radii
+shadows
+dimensions
+
+Do not scatter hardcoded design values throughout components.
+
+QUALITY BAR
+
+The final result should feel like a production children's learning application, not a developer prototype.
+
+Check:
+- spacing
+- alignment
+- typography
+- card proportions
+- icon sizes
+- button sizes
+- shadows
+- background illustrations
+- responsive behavior
+- touch targets
+- navigation
+- animations
+
+After implementation, compare every screen against the reference screenshots and iterate until the visual difference is minimal.
+
+Do not stop after creating the first version.
+Run the application, inspect screenshots, compare against the reference, and fix visual mismatches.
+
+DELIVERABLE
+
+Implement all four screens:
+1. Find Red
+2. Learn Colors
+3. Color World
+4. My World
+
+Also implement the activity screens:
+5. Color Match
+6. Color Mix
+7. Color Sort
+8. Correct Answer / Celebration
+
+Use the supplied background assets and maintain one consistent visual design system across the entire application.
