@@ -15,7 +15,6 @@ export type RootStackParamList = {
   FindColor: undefined;
   SortColor: undefined;
   MatchColor: undefined;
-  MixColor: undefined;
   NumberIntro: undefined;
   CountObjects: undefined;
   CountCollect: undefined;

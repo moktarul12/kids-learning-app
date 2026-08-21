@@ -30,7 +30,6 @@ export const WORLDS: {
 export const GAMES: GameDef[] = [
   // Color — learn then play
   { id: 'learn_color', title: 'Learn Colors', emoji: '🎨', world: 'color', route: 'LearnColor', blurb: 'Meet each color', kind: 'learn' },
-  { id: 'mix_color', title: 'Color Mix', emoji: '🧪', world: 'color', route: 'MixColor', blurb: 'Mix & discover', kind: 'learn' },
   { id: 'find_color', title: 'Find Color', emoji: '🔎', world: 'color', route: 'FindColor', blurb: 'Tap the right ones', kind: 'quiz' },
   { id: 'sort_color', title: 'Color Sort', emoji: '🧺', world: 'color', route: 'SortColor', blurb: 'Fill the baskets', kind: 'quiz' },
   { id: 'match_color', title: 'Color Match', emoji: '🔗', world: 'color', route: 'MatchColor', blurb: 'Pair dots & things', kind: 'quiz' },

@@ -57,6 +57,13 @@ export function CountObjectsScreen({ navigation }: RootStackProps<'CountObjects'
   });
   const count = useMemo(() => randInt(2, 8), [round]);
   const options = useMemo(() => shuffle([count, count + 1, Math.max(1, count - 1)]), [count, round]);
+  const [picked, setPicked] = useState<number | null>(null);
+  const [wrong, setWrong] = useState<number | null>(null);
+
+  useEffect(() => {
+    setPicked(null);
+    setWrong(null);
+  }, [round]);
 
   return (
     <GameShell
@@ -72,23 +79,53 @@ export function CountObjectsScreen({ navigation }: RootStackProps<'CountObjects'
       streak={streak}
       hint={hint}
     >
-      <View style={styles.wrap}>
-        {Array.from({ length: count }).map((_, i) => (
-          <Text key={i} style={{ fontSize: 42 }}>
-            🍎
-          </Text>
-        ))}
+      {/* Orchard stage — big apples to count */}
+      <View style={styles.orchard}>
+        <Text style={styles.orchardLabel}>Count the apples</Text>
+        <View style={styles.appleGrid}>
+          {Array.from({ length: count }).map((_, i) => (
+            <LivingIcon key={`${round}-${i}`} motion="bob">
+              <Text style={styles.apple}>{['🍎', '🍏'][i % 2]}</Text>
+            </LivingIcon>
+          ))}
+        </View>
+        <View style={styles.basketHint}>
+          <Text style={styles.basketEmoji}>🧺</Text>
+          <Text style={styles.basketText}>Tap the number below</Text>
+        </View>
       </View>
-      <View style={styles.row}>
-        {options.map((o) => (
-          <Pressable
-            key={`${round}-${o}`}
-            style={styles.opt}
-            onPress={() => (o === count ? (speak(`Yes! ${count}`), celebrate()) : almost())}
-          >
-            <Text style={styles.optText}>{o}</Text>
-          </Pressable>
-        ))}
+
+      <View style={styles.answerRow}>
+        {options.map((o) => {
+          const isWrong = wrong === o;
+          const isRight = picked === o && o === count;
+          return (
+            <Pressable
+              key={`${round}-${o}`}
+              onPress={() => {
+                if (o === count) {
+                  setPicked(o);
+                  speak(`Yes! ${count}`);
+                  celebrate();
+                } else {
+                  setWrong(o);
+                  setTimeout(() => setWrong(null), 450);
+                  almost('Count again!');
+                }
+              }}
+              style={({ pressed }) => [
+                styles.numBtn,
+                isRight && styles.numBtnRight,
+                isWrong && styles.numBtnWrong,
+                { transform: [{ scale: pressed ? 0.94 : 1 }] },
+              ]}
+            >
+              <Text style={[styles.numBtnText, isRight && { color: '#FFF' }, isWrong && { color: '#FFF' }]}>
+                {o}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
     </GameShell>
   );
@@ -244,8 +281,16 @@ export function NumberTrainScreen({ navigation }: RootStackProps<'NumberTrain'>)
     () => shuffle([missing, missing + 2, Math.max(1, missing - 1)]),
     [missing, round],
   );
+  const [wrong, setWrong] = useState<number | null>(null);
+  const [filled, setFilled] = useState(false);
 
-  useEffect(() => speak('Fix the number train'), [round]);
+  useEffect(() => {
+    setWrong(null);
+    setFilled(false);
+    speak('Fix the number train');
+  }, [round]);
+
+  const cars = [1, 2, 3, 4, 5];
 
   return (
     <GameShell
@@ -262,24 +307,78 @@ export function NumberTrainScreen({ navigation }: RootStackProps<'NumberTrain'>)
       hint={hint}
       rewardMessage="Choo choo!"
     >
-      <Text style={{ fontSize: 40 }}>🚂</Text>
-      <View style={styles.row}>
-        {[1, 2, 3, 4, 5].map((c) => (
-          <View key={c} style={[styles.coach, c === missing && styles.missing]}>
-            <Text style={styles.coachText}>{c === missing ? '?' : c}</Text>
-          </View>
-        ))}
+      <Text style={styles.trainHint}>Which number is missing?</Text>
+
+      {/* Track + train */}
+      <View style={styles.trainStage}>
+        <LivingIcon motion="bob">
+          <Text style={styles.engine}>🚂</Text>
+        </LivingIcon>
+
+        <View style={styles.trainCars}>
+          {cars.map((c) => {
+            const isGap = c === missing && !filled;
+            const isFilled = c === missing && filled;
+            return (
+              <View key={c} style={styles.carWrap}>
+                <View
+                  style={[
+                    styles.car,
+                    isGap && styles.carGap,
+                    isFilled && styles.carFilled,
+                    !isGap && !isFilled && styles.carSolid,
+                  ]}
+                >
+                  <Text style={[styles.carNum, isGap && styles.carNumGap]}>
+                    {isGap ? '?' : c}
+                  </Text>
+                </View>
+                <View style={styles.wheels}>
+                  <View style={styles.wheel} />
+                  <View style={styles.wheel} />
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
+        <View style={styles.track} />
+        <View style={styles.trackTies}>
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+            <View key={i} style={styles.tie} />
+          ))}
+        </View>
       </View>
-      <View style={styles.row}>
-        {options.map((o) => (
-          <Pressable
-            key={`${round}-${o}`}
-            style={styles.opt}
-            onPress={() => (o === missing ? celebrate('Choo choo!') : almost())}
-          >
-            <Text style={styles.optText}>{o}</Text>
-          </Pressable>
-        ))}
+
+      <Text style={styles.pickLabel}>Pick the missing number</Text>
+
+      <View style={styles.answerRow}>
+        {options.map((o) => {
+          const isWrong = wrong === o;
+          return (
+            <Pressable
+              key={`${round}-${o}`}
+              onPress={() => {
+                if (o === missing) {
+                  setFilled(true);
+                  speak(`Yes! ${missing}`);
+                  setTimeout(() => celebrate('Choo choo!'), 400);
+                } else {
+                  setWrong(o);
+                  setTimeout(() => setWrong(null), 450);
+                  almost('Try another car!');
+                }
+              }}
+              style={({ pressed }) => [
+                styles.numBtn,
+                isWrong && styles.numBtnWrong,
+                { transform: [{ scale: pressed ? 0.94 : 1 }] },
+              ]}
+            >
+              <Text style={[styles.numBtnText, isWrong && { color: '#FFF' }]}>{o}</Text>
+            </Pressable>
+          );
+        })}
       </View>
     </GameShell>
   );
@@ -332,6 +431,79 @@ const styles = StyleSheet.create({
   stars: { fontSize: 28, letterSpacing: 4 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' },
+  orchard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#E8FBE8',
+    borderRadius: 28,
+    borderWidth: 3,
+    borderColor: '#B8E8B8',
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    gap: 12,
+  },
+  orchardLabel: {
+    ...typography.kidLabel,
+    fontSize: 16,
+    color: colors.inkMuted,
+  },
+  appleGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    justifyContent: 'center',
+    minHeight: 140,
+    alignItems: 'center',
+  },
+  apple: {
+    fontSize: 68,
+    lineHeight: 76,
+  },
+  basketHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.75)',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  basketEmoji: { fontSize: 22 },
+  basketText: {
+    ...typography.kidLabel,
+    fontSize: 14,
+    color: colors.ink,
+  },
+  answerRow: {
+    flexDirection: 'row',
+    gap: 14,
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  numBtn: {
+    width: 88,
+    height: 88,
+    borderRadius: 24,
+    backgroundColor: '#FFF',
+    borderWidth: 4,
+    borderColor: colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  numBtnRight: {
+    backgroundColor: colors.lime,
+    borderColor: colors.lime,
+  },
+  numBtnWrong: {
+    backgroundColor: colors.red,
+    borderColor: colors.red,
+  },
+  numBtnText: {
+    ...typography.title,
+    fontSize: 36,
+    color: colors.blue,
+  },
   opt: {
     width: 72,
     height: 72,
@@ -354,6 +526,104 @@ const styles = StyleSheet.create({
   },
   missing: { backgroundColor: colors.yellow },
   coachText: { ...typography.title, color: '#FFF', fontSize: 22 },
+  trainHint: {
+    ...typography.kidLabel,
+    fontSize: 16,
+    color: colors.inkMuted,
+  },
+  trainStage: {
+    width: '100%',
+    maxWidth: 380,
+    alignItems: 'center',
+    backgroundColor: '#E8F6FC',
+    borderRadius: 28,
+    paddingTop: 12,
+    paddingBottom: 18,
+    paddingHorizontal: 8,
+    borderWidth: 3,
+    borderColor: '#B8DFF0',
+  },
+  engine: {
+    fontSize: 72,
+    lineHeight: 80,
+    marginBottom: 4,
+  },
+  trainCars: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    gap: 6,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  carWrap: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  car: {
+    width: 56,
+    height: 64,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+  },
+  carSolid: {
+    backgroundColor: colors.coral,
+    borderColor: '#E04545',
+  },
+  carGap: {
+    backgroundColor: '#FFF8E1',
+    borderColor: colors.yellow,
+    borderStyle: 'dashed',
+  },
+  carFilled: {
+    backgroundColor: colors.lime,
+    borderColor: '#5ECF5A',
+  },
+  carNum: {
+    ...typography.title,
+    fontSize: 28,
+    color: '#FFF',
+  },
+  carNumGap: {
+    color: colors.inkMuted,
+    fontSize: 30,
+  },
+  wheels: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  wheel: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#4A5568',
+  },
+  track: {
+    marginTop: 8,
+    width: '92%',
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#8B7355',
+  },
+  trackTies: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '88%',
+    marginTop: 4,
+  },
+  tie: {
+    width: 14,
+    height: 6,
+    borderRadius: 2,
+    backgroundColor: '#A08060',
+  },
+  pickLabel: {
+    ...typography.kidLabel,
+    fontSize: 15,
+    color: colors.ink,
+    marginTop: 4,
+  },
   pile: {
     backgroundColor: '#F3F8FF',
     borderRadius: 22,

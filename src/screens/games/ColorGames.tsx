@@ -10,17 +10,19 @@ import {
   ProgressIndicator,
 } from '../../components/ui';
 import { LivingIcon } from '../../components/KidAnimations';
-import { RewardModal } from '../../components/RewardModal';
+import { RewardModal, FeedbackToast } from '../../components/RewardModal';
 import { colors, fonts, radii, shadows, spacing } from '../../theme';
 import { learningColors } from '../../theme/colors';
-import { useGameSession } from '../../hooks/useGameSession';
+import { useGameSession, shuffle } from '../../hooks/useGameSession';
 import { speak } from '../../services/voice';
 import {
   BACKGROUNDS,
   FIND_COLOR_ACTIVITIES,
   LEARN_COLOR_STEPS,
   FindColorActivity,
+  FindColorOption,
 } from '../../data/colorActivities';
+import * as Haptics from 'expo-haptics';
 
 function ActivityFrame({
   background,
@@ -35,6 +37,7 @@ function ActivityFrame({
   showReward,
   onNext,
   streak,
+  hint,
 }: {
   background: number;
   title: string;
@@ -48,6 +51,7 @@ function ActivityFrame({
   showReward: boolean;
   onNext: () => void;
   streak: number;
+  hint?: string | null;
 }) {
   return (
     <AppShell background={background}>
@@ -64,12 +68,13 @@ function ActivityFrame({
           <ProgressIndicator current={progressCurrent} total={progressTotal} />
         </ContentStage>
       </View>
+      {hint ? <FeedbackToast text={hint} /> : null}
       <RewardModal visible={showReward} onNext={onNext} streak={streak} message="Great Job!" />
     </AppShell>
   );
 }
 
-/** LEARN COLORS — plan.txt */
+/** LEARN COLORS — big hero + large example icons */
 export function LearnColorScreen({ navigation }: RootStackProps<'LearnColor'>) {
   const [idx, setIdx] = useState(0);
   const step = LEARN_COLOR_STEPS[idx];
@@ -98,17 +103,32 @@ export function LearnColorScreen({ navigation }: RootStackProps<'LearnColor'>) {
       onNext={playNext}
       streak={streak}
     >
-      <LivingIcon motion="bob">
-        <Text style={{ fontSize: 88 }}>{step.heroEmoji}</Text>
-      </LivingIcon>
-
-      <View style={[styles.colorBanner, { backgroundColor: step.hex }, shadows.soft]}>
-        <Text style={styles.colorBannerText}>{step.name.toUpperCase()}</Text>
+      {/* Hero color stage — oversized apple / object */}
+      <View style={[styles.heroStage, { backgroundColor: step.hex + '22', borderColor: step.hex + '55' }]}>
+        <LivingIcon motion="bob">
+          <Text style={styles.heroEmoji}>{step.heroEmoji}</Text>
+        </LivingIcon>
+        <View style={[styles.colorChipLabel, { backgroundColor: step.hex }, shadows.soft]}>
+          <Text style={styles.colorChipText}>{step.name.toUpperCase()}</Text>
+        </View>
       </View>
 
-      <View style={styles.choiceRow}>
+      <Text style={styles.examplesLabel}>More {step.name.toLowerCase()} things</Text>
+
+      {/* Large example tiles — heart / car / balloon */}
+      <View style={styles.exampleRow}>
         {step.choices.map((emoji) => (
-          <AnswerCard key={emoji} emoji={emoji} size={84} onPress={() => speak(step.name)} />
+          <Pressable
+            key={emoji}
+            onPress={() => speak(step.name)}
+            style={({ pressed }) => [
+              styles.exampleTile,
+              shadows.soft,
+              { transform: [{ scale: pressed ? 0.94 : 1 }], borderColor: step.hex + '40' },
+            ]}
+          >
+            <Text style={styles.exampleEmoji}>{emoji}</Text>
+          </Pressable>
         ))}
       </View>
 
@@ -125,15 +145,15 @@ export function LearnColorScreen({ navigation }: RootStackProps<'LearnColor'>) {
         label={idx < LEARN_COLOR_STEPS.length - 1 ? 'Next Color ›' : 'Finish'}
         color={step.hex}
         onPress={() => (idx < LEARN_COLOR_STEPS.length - 1 ? setIdx(idx + 1) : celebrate())}
-        style={{ width: '100%', marginTop: 8 }}
+        style={{ width: '100%', marginTop: 4 }}
       />
     </ActivityFrame>
   );
 }
 
-/** FIND COLOR — data-driven (Find Red / Blue / Yellow…) */
+/** FIND COLOR — always show enough targets; clear tap feedback */
 export function FindColorScreen({ navigation }: RootStackProps<'FindColor'>) {
-  const { showReward, celebrate, almost, playNext, streak, round } = useGameSession({
+  const { showReward, celebrate, almost, playNext, streak, round, hint } = useGameSession({
     gameId: 'find_color',
     skill: 'colors',
     dailyTaskId: 'find_red',
@@ -145,18 +165,47 @@ export function FindColorScreen({ navigation }: RootStackProps<'FindColor'>) {
     [round],
   );
 
-  const [found, setFound] = useState<string[]>([]);
-  const [shakeId, setShakeId] = useState<string | null>(null);
-  const [shakeKey, setShakeKey] = useState(0);
+  /** Build an 8-tile grid that always includes `need` correct answers */
+  const need = 2;
+  const grid: FindColorOption[] = useMemo(() => {
+    const targets = shuffle(activity.options.filter((o) => o.colorId === activity.targetColor));
+    const others = shuffle(activity.options.filter((o) => o.colorId !== activity.targetColor));
+    const pickTargets = targets.slice(0, Math.min(need, targets.length));
+    const pickOthers = others.slice(0, 8 - pickTargets.length);
+    return shuffle([...pickTargets, ...pickOthers]);
+  }, [activity, round]);
 
-  const correctNeeded = activity.options.filter((o) => o.colorId === activity.targetColor).length;
-  const progress = Math.min(found.length, 3);
+  const [found, setFound] = useState<string[]>([]);
+  const [wrongId, setWrongId] = useState<string | null>(null);
+  const [flashYes, setFlashYes] = useState(false);
 
   useEffect(() => {
     setFound([]);
-    setShakeId(null);
+    setWrongId(null);
+    setFlashYes(false);
     speak(activity.title);
   }, [round, activity.title]);
+
+  const onPick = (opt: FindColorOption) => {
+    if (found.includes(opt.id) || showReward) return;
+
+    if (opt.colorId === activity.targetColor) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      speak('Yes!');
+      setFlashYes(true);
+      setTimeout(() => setFlashYes(false), 700);
+      const next = [...found, opt.id];
+      setFound(next);
+      if (next.length >= need) {
+        setTimeout(() => celebrate(), 450);
+      }
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+      setWrongId(opt.id);
+      setTimeout(() => setWrongId(null), 500);
+      almost('Not that one — find ' + activity.targetColor + '!');
+    }
+  };
 
   return (
     <ActivityFrame
@@ -166,38 +215,50 @@ export function FindColorScreen({ navigation }: RootStackProps<'FindColor'>) {
       prompt={activity.prompt}
       onBack={() => navigation.goBack()}
       onSpeak={() => speak(activity.title)}
-      progressCurrent={progress}
-      progressTotal={Math.min(3, correctNeeded)}
+      progressCurrent={found.length}
+      progressTotal={need}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
+      hint={hint}
     >
-      <View style={[styles.targetCircle, { backgroundColor: activity.targetHex }, shadows.soft]} />
+      {/* Big color target */}
+      <View style={[styles.findTarget, { backgroundColor: activity.targetHex + '18', borderColor: activity.targetHex }]}>
+        <View style={[styles.findTargetDot, { backgroundColor: activity.targetHex }, shadows.soft]} />
+        <Text style={[styles.findTargetLabel, { color: activity.targetHex }]}>
+          Tap {need} {activity.targetColor} things
+        </Text>
+      </View>
 
-      <View style={styles.answerGrid}>
-        {activity.options.slice(0, 8).map((opt) => {
+      {flashYes ? <Text style={styles.findYes}>Yes! ⭐</Text> : null}
+      <Text style={styles.findStatus}>
+        Found {found.length} of {need}
+      </Text>
+
+      <View style={styles.findGrid}>
+        {grid.map((opt) => {
           const isFound = found.includes(opt.id);
+          const isWrong = wrongId === opt.id;
           return (
-            <AnswerCard
+            <Pressable
               key={opt.id}
-              emoji={opt.emoji}
-              size={102}
-              correctHighlight={isFound}
-              shakeKey={shakeId === opt.id ? shakeKey : 0}
-              onPress={() => {
-                if (isFound) return;
-                if (opt.colorId === activity.targetColor) {
-                  speak('Yes!');
-                  const next = [...found, opt.id];
-                  setFound(next);
-                  if (next.length >= Math.min(3, correctNeeded)) celebrate();
-                } else {
-                  setShakeId(opt.id);
-                  setShakeKey((k) => k + 1);
-                  almost('Try again!');
-                }
-              }}
-            />
+              onPress={() => onPick(opt)}
+              disabled={isFound}
+              style={({ pressed }) => [
+                styles.findTile,
+                shadows.soft,
+                isFound && styles.findTileFound,
+                isWrong && styles.findTileWrong,
+                { transform: [{ scale: pressed && !isFound ? 0.94 : 1 }] },
+              ]}
+            >
+              <Text style={styles.findTileEmoji}>{opt.emoji}</Text>
+              {isFound ? (
+                <View style={styles.findCheck}>
+                  <Text style={styles.findCheckText}>✓</Text>
+                </View>
+              ) : null}
+            </Pressable>
           );
         })}
       </View>
@@ -205,61 +266,167 @@ export function FindColorScreen({ navigation }: RootStackProps<'FindColor'>) {
   );
 }
 
+const SORT_SETS: {
+  a: string;
+  b: string;
+  items: { emoji: string; colorId: string }[];
+}[] = [
+  {
+    a: 'red',
+    b: 'blue',
+    items: [
+      { emoji: '🍎', colorId: 'red' },
+      { emoji: '❤️', colorId: 'red' },
+      { emoji: '🚗', colorId: 'red' },
+      { emoji: '🎈', colorId: 'red' },
+      { emoji: '💧', colorId: 'blue' },
+      { emoji: '🐟', colorId: 'blue' },
+      { emoji: '🧢', colorId: 'blue' },
+      { emoji: '🦋', colorId: 'blue' },
+    ],
+  },
+  {
+    a: 'yellow',
+    b: 'green',
+    items: [
+      { emoji: '☀️', colorId: 'yellow' },
+      { emoji: '🍌', colorId: 'yellow' },
+      { emoji: '⭐', colorId: 'yellow' },
+      { emoji: '🐥', colorId: 'yellow' },
+      { emoji: '🌳', colorId: 'green' },
+      { emoji: '🐸', colorId: 'green' },
+      { emoji: '🥒', colorId: 'green' },
+      { emoji: '🥬', colorId: 'green' },
+    ],
+  },
+  {
+    a: 'orange',
+    b: 'purple',
+    items: [
+      { emoji: '🍊', colorId: 'orange' },
+      { emoji: '🦊', colorId: 'orange' },
+      { emoji: '🎃', colorId: 'orange' },
+      { emoji: '🥕', colorId: 'orange' },
+      { emoji: '🍇', colorId: 'purple' },
+      { emoji: '🟣', colorId: 'purple' },
+      { emoji: '👾', colorId: 'purple' },
+      { emoji: '☂️', colorId: 'purple' },
+    ],
+  },
+  {
+    a: 'pink',
+    b: 'brown',
+    items: [
+      { emoji: '🌸', colorId: 'pink' },
+      { emoji: '🐷', colorId: 'pink' },
+      { emoji: '🎀', colorId: 'pink' },
+      { emoji: '🦩', colorId: 'pink' },
+      { emoji: '🧸', colorId: 'brown' },
+      { emoji: '🍪', colorId: 'brown' },
+      { emoji: '🤎', colorId: 'brown' },
+      { emoji: '🌰', colorId: 'brown' },
+    ],
+  },
+];
+
+function colorById(id: string) {
+  return learningColors.find((c) => c.id === id)!;
+}
+
 export function SortColorScreen({ navigation }: RootStackProps<'SortColor'>) {
-  const { showReward, celebrate, almost, playNext, streak, round } = useGameSession({
+  const { showReward, celebrate, almost, playNext, streak, round, hint } = useGameSession({
     gameId: 'sort_color',
     skill: 'colors',
     prompt: 'Sort into baskets',
   });
+
+  const set = SORT_SETS[round % SORT_SETS.length];
+  const baskets = [colorById(set.a), colorById(set.b)];
+  const total = 6;
+
   const makeQueue = () =>
-    [
-      { emoji: '🍎', colorId: 'red' },
-      { emoji: '❤️', colorId: 'red' },
-      { emoji: '💧', colorId: 'blue' },
-      { emoji: '🐟', colorId: 'blue' },
-      { emoji: '🚗', colorId: 'red' },
-      { emoji: '🧢', colorId: 'blue' },
-    ].sort(() => Math.random() - 0.5);
+    [...set.items].sort(() => Math.random() - 0.5).slice(0, total);
+
   const [queue, setQueue] = useState(makeQueue);
+  const [flash, setFlash] = useState<'ok' | 'no' | null>(null);
   const current = queue[0];
-  useEffect(() => setQueue(makeQueue()), [round]);
+
+  useEffect(() => {
+    setQueue(makeQueue());
+    setFlash(null);
+    speak(`Sort ${baskets[0].name} and ${baskets[1].name}`);
+  }, [round]);
+
+  const sortInto = (colorId: string, name: string) => {
+    if (!current || showReward) return;
+    if (current.colorId === colorId) {
+      setFlash('ok');
+      speak(name);
+      const next = queue.slice(1);
+      setTimeout(() => {
+        setFlash(null);
+        setQueue(next);
+        if (!next.length) celebrate();
+      }, 280);
+    } else {
+      setFlash('no');
+      setTimeout(() => setFlash(null), 400);
+      almost(`Try the ${colorById(current.colorId).name} basket!`);
+    }
+  };
 
   return (
     <ActivityFrame
       background={BACKGROUNDS.colorWorld}
       title="Color Sort"
       round={round}
-      prompt="🧺 Sort into baskets"
+      prompt={`🧺 ${baskets[0].name} or ${baskets[1].name}?`}
       onBack={() => navigation.goBack()}
-      onSpeak={() => speak('Sort into baskets')}
-      progressCurrent={6 - queue.length}
-      progressTotal={6}
+      onSpeak={() => speak(`Sort ${baskets[0].name} and ${baskets[1].name}`)}
+      progressCurrent={total - queue.length}
+      progressTotal={total}
       showReward={showReward}
       onNext={playNext}
       streak={streak}
+      hint={hint}
     >
-      {current ? (
-        <LivingIcon motion="bob">
-          <Text style={{ fontSize: 72 }}>{current.emoji}</Text>
-        </LivingIcon>
-      ) : null}
-      <View style={styles.choiceRow}>
-        {[learningColors[0], learningColors[1]].map((b) => (
-          <PrimaryButton
+      <Text style={styles.sortHint}>
+        Round colors: {baskets[0].emoji} {baskets[0].name} · {baskets[1].emoji} {baskets[1].name}
+      </Text>
+
+      <View
+        style={[
+          styles.sortStage,
+          flash === 'ok' && styles.sortStageOk,
+          flash === 'no' && styles.sortStageNo,
+        ]}
+      >
+        {current ? (
+          <LivingIcon motion="bob">
+            <Text style={styles.sortHero}>{current.emoji}</Text>
+          </LivingIcon>
+        ) : (
+          <Text style={styles.sortHero}>🎉</Text>
+        )}
+      </View>
+
+      <View style={styles.basketRow}>
+        {baskets.map((b) => (
+          <Pressable
             key={b.id}
-            label={`${b.name} 🧺`}
-            color={b.hex}
-            onPress={() => {
-              if (!current) return;
-              if (current.colorId === b.id) {
-                speak(b.name);
-                const next = queue.slice(1);
-                setQueue(next);
-                if (!next.length) celebrate();
-              } else almost();
-            }}
-            style={{ flex: 1 }}
-          />
+            onPress={() => sortInto(b.id, b.name)}
+            style={({ pressed }) => [
+              styles.basketCard,
+              { borderColor: b.hex, backgroundColor: b.hex + '18' },
+              { transform: [{ scale: pressed ? 0.95 : 1 }] },
+            ]}
+          >
+            <Text style={styles.basketEmoji}>🧺</Text>
+            <Text style={{ fontSize: 36 }}>{b.emoji}</Text>
+            <View style={[styles.basketLabel, { backgroundColor: b.hex }]}>
+              <Text style={styles.basketLabelText}>{b.name}</Text>
+            </View>
+          </Pressable>
         ))}
       </View>
     </ActivityFrame>
@@ -340,54 +507,6 @@ export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
   );
 }
 
-export function MixColorScreen({ navigation }: RootStackProps<'MixColor'>) {
-  const mixes = [
-    { a: learningColors[0], b: learningColors[2], result: learningColors[4], label: 'Orange' },
-    { a: learningColors[1], b: learningColors[2], result: learningColors[3], label: 'Green' },
-  ];
-  const [step, setStep] = useState(0);
-  const mix = mixes[step % mixes.length];
-  const { showReward, celebrate, playNext, streak, round } = useGameSession({
-    gameId: 'mix_color',
-    skill: 'colors',
-    prompt: `${mix.a.name} plus ${mix.b.name}`,
-  });
-  useEffect(() => setStep(0), [round]);
-  useEffect(() => speak(`${mix.a.name} plus ${mix.b.name} makes ${mix.label}`), [step, mix]);
-
-  return (
-    <ActivityFrame
-      background={BACKGROUNDS.colorWorld}
-      title="Color Mix"
-      round={round}
-      prompt={`🧪 ${mix.a.name} + ${mix.b.name}`}
-      onBack={() => navigation.goBack()}
-      onSpeak={() => speak(`${mix.a.name} plus ${mix.b.name} makes ${mix.label}`)}
-      progressCurrent={step + 1}
-      progressTotal={mixes.length}
-      showReward={showReward}
-      onNext={playNext}
-      streak={streak}
-    >
-      <View style={styles.choiceRow}>
-        <View style={[styles.tube, { backgroundColor: mix.a.hex }]} />
-        <Text style={styles.plus}>+</Text>
-        <View style={[styles.tube, { backgroundColor: mix.b.hex }]} />
-        <Text style={styles.plus}>=</Text>
-        <View style={[styles.tube, { backgroundColor: mix.result.hex }]}>
-          <Text style={styles.tubeLabel}>{mix.label}</Text>
-        </View>
-      </View>
-      <PrimaryButton
-        label={step < mixes.length - 1 ? 'Next Mix ›' : 'Finish'}
-        color={mix.result.hex}
-        onPress={() => (step < mixes.length - 1 ? setStep(step + 1) : celebrate())}
-        style={{ width: '100%' }}
-      />
-    </ActivityFrame>
-  );
-}
-
 const styles = StyleSheet.create({
   body: { flex: 1, paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
   prompt: {
@@ -402,7 +521,64 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.md,
+    gap: 10,
+  },
+  heroStage: {
+    width: '100%',
+    maxWidth: 300,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    borderRadius: 28,
+    borderWidth: 2,
+    gap: 12,
+  },
+  heroEmoji: {
+    fontSize: 120,
+    lineHeight: 132,
+    textAlign: 'center',
+  },
+  colorChipLabel: {
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: radii.pill,
+    minWidth: 140,
+    alignItems: 'center',
+  },
+  colorChipText: {
+    fontFamily: fonts.heading,
+    fontSize: 22,
+    color: colors.white,
+    letterSpacing: 1.2,
+  },
+  examplesLabel: {
+    fontFamily: fonts.label,
+    fontSize: 15,
+    color: colors.secondaryText,
+    marginTop: 4,
+  },
+  exampleRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    width: '100%',
+    paddingHorizontal: 4,
+  },
+  exampleTile: {
+    flex: 1,
+    maxWidth: 112,
+    aspectRatio: 1,
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  exampleEmoji: {
+    fontSize: 64,
+    lineHeight: 72,
+    textAlign: 'center',
   },
   colorBanner: {
     width: '100%',
@@ -424,8 +600,84 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
   },
-  dots: { flexDirection: 'row', gap: 8, marginTop: 4 },
+  dots: { flexDirection: 'row', gap: 8, marginTop: 2 },
   dot: { width: 10, height: 10, borderRadius: 5 },
+  findTarget: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    borderWidth: 3,
+    width: '100%',
+    maxWidth: 340,
+  },
+  findTargetDot: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+  },
+  findTargetLabel: {
+    flex: 1,
+    fontFamily: fonts.heading,
+    fontSize: 18,
+  },
+  findYes: {
+    fontFamily: fonts.heading,
+    fontSize: 22,
+    color: colors.green,
+  },
+  findStatus: {
+    fontFamily: fonts.label,
+    fontSize: 16,
+    color: colors.darkText,
+  },
+  findGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'center',
+    maxWidth: 360,
+  },
+  findTile: {
+    width: 96,
+    height: 96,
+    borderRadius: 24,
+    backgroundColor: colors.white,
+    borderWidth: 3,
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  findTileFound: {
+    backgroundColor: '#E8FBE8',
+    borderColor: colors.green,
+  },
+  findTileWrong: {
+    backgroundColor: '#FFE8E8',
+    borderColor: colors.primaryRed,
+  },
+  findTileEmoji: {
+    fontSize: 52,
+    lineHeight: 60,
+  },
+  findCheck: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.green,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  findCheckText: {
+    color: colors.white,
+    fontFamily: fonts.heading,
+    fontSize: 14,
+  },
   targetCircle: {
     width: 72,
     height: 72,
@@ -444,14 +696,65 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
   },
-  tube: {
-    width: 64,
-    height: 80,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingBottom: 8,
+  sortHint: {
+    fontFamily: fonts.label,
+    fontSize: 16,
+    color: colors.secondaryText,
   },
-  tubeLabel: { fontFamily: fonts.label, color: colors.white, fontSize: 11 },
-  plus: { fontFamily: fonts.heading, fontSize: 28, color: colors.darkText },
+  sortStage: {
+    width: '100%',
+    maxWidth: 280,
+    minHeight: 200,
+    borderRadius: 32,
+    backgroundColor: '#F7FBFF',
+    borderWidth: 3,
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sortStageOk: {
+    backgroundColor: '#E8FBE8',
+    borderColor: colors.green,
+  },
+  sortStageNo: {
+    backgroundColor: '#FFE8E8',
+    borderColor: colors.primaryRed,
+  },
+  sortHero: {
+    fontSize: 120,
+    lineHeight: 132,
+    textAlign: 'center',
+  },
+  basketRow: {
+    flexDirection: 'row',
+    gap: 14,
+    width: '100%',
+    maxWidth: 360,
+    justifyContent: 'center',
+  },
+  basketCard: {
+    flex: 1,
+    maxWidth: 160,
+    minHeight: 140,
+    borderRadius: 28,
+    borderWidth: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 16,
+  },
+  basketEmoji: {
+    fontSize: 64,
+    lineHeight: 72,
+  },
+  basketLabel: {
+    borderRadius: 999,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+  },
+  basketLabelText: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.white,
+  },
 });

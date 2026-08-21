@@ -17,7 +17,6 @@ import {
   FindColorScreen,
   SortColorScreen,
   MatchColorScreen,
-  MixColorScreen,
 } from '../screens/games/ColorGames';
 import {
   NumberIntroScreen,
@@ -138,7 +137,6 @@ export function RootNavigator() {
         <Stack.Screen name="FindColor" component={FindColorScreen} />
         <Stack.Screen name="SortColor" component={SortColorScreen} />
         <Stack.Screen name="MatchColor" component={MatchColorScreen} />
-        <Stack.Screen name="MixColor" component={MixColorScreen} />
         <Stack.Screen name="NumberIntro" component={NumberIntroScreen} />
         <Stack.Screen name="CountObjects" component={CountObjectsScreen} />
         <Stack.Screen name="CountCollect" component={CountCollectScreen} />

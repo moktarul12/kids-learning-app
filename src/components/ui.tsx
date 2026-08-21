@@ -246,7 +246,7 @@ export function ActivityCard({
     >
       <View style={[styles.activityBubble, { backgroundColor: tint + '22' }]}>
         <LivingIcon motion="pulse">
-          <Text style={{ fontSize: 42 }}>{emoji}</Text>
+          <Text style={{ fontSize: 46 }}>{emoji}</Text>
         </LivingIcon>
         {done ? (
           <View style={styles.doneBadge}>
@@ -481,10 +481,10 @@ const styles = StyleSheet.create({
     gap: 6,
     maxWidth: '100%',
   },
-  titleEmoji: { fontSize: 20 },
+  titleEmoji: { fontSize: 22 },
   appHeaderTitle: {
     fontFamily: fonts.heading,
-    fontSize: 20,
+    fontSize: 22,
     color: colors.darkText,
     letterSpacing: 0.2,
     textAlign: 'center',
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   },
   appHeaderSub: {
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.secondaryText,
     marginTop: 1,
     textAlign: 'center',
@@ -564,8 +564,8 @@ const styles = StyleSheet.create({
   worldIcon: { width: '100%', height: '100%', transform: [{ scale: 1.08 }] },
   worldLabel: {
     fontFamily: fonts.label,
-    fontSize: 13,
-    lineHeight: 16,
+    fontSize: 15,
+    lineHeight: 18,
     color: colors.darkText,
     textAlign: 'center',
     marginTop: 2,
@@ -574,19 +574,20 @@ const styles = StyleSheet.create({
   activityCard: {
     backgroundColor: colors.white,
     borderRadius: 22,
-    paddingTop: 16,
-    paddingBottom: 12,
-    paddingHorizontal: 6,
+    paddingTop: 14,
+    paddingBottom: 14,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    minHeight: 124,
+    minHeight: 132,
+    justifyContent: 'center',
   },
   activityBubble: {
-    width: 70,
-    height: 70,
-    borderRadius: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   doneBadge: {
     position: 'absolute',
@@ -604,10 +605,11 @@ const styles = StyleSheet.create({
   doneText: { color: colors.white, fontSize: 12, fontFamily: fonts.heading },
   activityLabel: {
     fontFamily: fonts.label,
-    fontSize: 12,
+    fontSize: 15,
     color: colors.darkText,
     textAlign: 'center',
-    lineHeight: 15,
+    lineHeight: 18,
+    paddingHorizontal: 2,
   },
 
   answerCard: {

@@ -25,6 +25,8 @@ export const FIND_COLOR_ACTIVITIES: FindColorActivity[] = [
     targetHex: '#FF5252',
     options: [
       { id: 'heart', emoji: '❤️', colorId: 'red' },
+      { id: 'car', emoji: '🚗', colorId: 'red' },
+      { id: 'balloon', emoji: '🎈', colorId: 'red' },
       { id: 'frog', emoji: '🐸', colorId: 'green' },
       { id: 'butterfly', emoji: '🦋', colorId: 'blue' },
       { id: 'tree', emoji: '🌳', colorId: 'green' },
@@ -32,7 +34,6 @@ export const FIND_COLOR_ACTIVITIES: FindColorActivity[] = [
       { id: 'grapes', emoji: '🍇', colorId: 'purple' },
       { id: 'banana', emoji: '🍌', colorId: 'yellow' },
       { id: 'orange', emoji: '🍊', colorId: 'orange' },
-      { id: 'car', emoji: '🚗', colorId: 'red' },
     ],
   },
   {
