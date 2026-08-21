@@ -482,7 +482,7 @@ export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
 
   const status =
     matched.length === pairs.length
-      ? 'All matched! 🎉'
+      ? '🎉 All matched!'
       : selected
         ? 'Now tap the matching thing →'
         : '① Tap a color first';
@@ -492,7 +492,7 @@ export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
       background={BACKGROUNDS.learnColors}
       title="Color Match"
       round={round}
-      prompt="🔗 Match the colors"
+      prompt={status}
       onBack={() => navigation.goBack()}
       onSpeak={() => speak('Match the colors')}
       progressCurrent={matched.length}
@@ -502,8 +502,6 @@ export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
       streak={streak}
       hint={hint}
     >
-      <Text style={styles.matchStatus}>{status}</Text>
-
       {/* Colors zone */}
       <View style={[styles.matchZone, { backgroundColor: '#E8F4FF' }]}>
         <Text style={styles.matchZoneTitle}>Colors</Text>
@@ -605,8 +603,10 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: 10,
+    paddingTop: 4,
+    overflow: 'hidden',
   },
   heroStage: {
     width: '100%',
