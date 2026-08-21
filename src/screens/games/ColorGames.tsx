@@ -5,7 +5,6 @@ import {
   AppShell,
   ActivityHeader,
   ContentStage,
-  AnswerCard,
   PrimaryButton,
   ProgressIndicator,
 } from '../../components/ui';
@@ -433,27 +432,60 @@ export function SortColorScreen({ navigation }: RootStackProps<'SortColor'>) {
   );
 }
 
+const MATCH_SETS: { colorId: string; emoji: string }[][] = [
+  [
+    { colorId: 'red', emoji: '🍎' },
+    { colorId: 'green', emoji: '🌳' },
+    { colorId: 'yellow', emoji: '☀️' },
+  ],
+  [
+    { colorId: 'blue', emoji: '💧' },
+    { colorId: 'orange', emoji: '🍊' },
+    { colorId: 'purple', emoji: '🍇' },
+  ],
+  [
+    { colorId: 'pink', emoji: '🌸' },
+    { colorId: 'brown', emoji: '🧸' },
+    { colorId: 'red', emoji: '🚗' },
+  ],
+];
+
 export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
-  const { showReward, celebrate, almost, playNext, streak, round } = useGameSession({
+  const { showReward, celebrate, almost, playNext, streak, round, hint } = useGameSession({
     gameId: 'match_color',
     skill: 'colors',
     prompt: 'Match the colors',
   });
+
+  const base = MATCH_SETS[round % MATCH_SETS.length];
   const pairs = useMemo(
     () =>
-      [
-        { color: learningColors[0], emoji: '🍎' },
-        { color: learningColors[3], emoji: '🌳' },
-        { color: learningColors[2], emoji: '☀️' },
-      ].sort(() => Math.random() - 0.5),
+      shuffle(
+        base.map((p) => ({
+          ...p,
+          color: colorById(p.colorId),
+        })),
+      ),
     [round],
   );
+  const things = useMemo(() => shuffle([...pairs]), [pairs]);
+
   const [selected, setSelected] = useState<string | null>(null);
   const [matched, setMatched] = useState<string[]>([]);
+  const [wrongId, setWrongId] = useState<string | null>(null);
+
   useEffect(() => {
     setSelected(null);
     setMatched([]);
+    setWrongId(null);
   }, [round]);
+
+  const status =
+    matched.length === pairs.length
+      ? 'All matched! 🎉'
+      : selected
+        ? 'Now tap the matching thing →'
+        : '① Tap a color first';
 
   return (
     <ActivityFrame
@@ -468,40 +500,93 @@ export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
       showReward={showReward}
       onNext={playNext}
       streak={streak}
+      hint={hint}
     >
-      <View style={styles.choiceRow}>
-        {pairs.map((p) => (
-          <Pressable
-            key={p.color.id}
-            onPress={() => !matched.includes(p.color.id) && setSelected(p.color.id)}
-            style={[
-              styles.colorChip,
-              { backgroundColor: p.color.hex },
-              selected === p.color.id && { borderWidth: 4, borderColor: colors.darkText },
-              matched.includes(p.color.id) && { opacity: 0.35 },
-            ]}
-          />
-        ))}
+      <Text style={styles.matchStatus}>{status}</Text>
+
+      {/* Colors zone */}
+      <View style={[styles.matchZone, { backgroundColor: '#E8F4FF' }]}>
+        <Text style={styles.matchZoneTitle}>Colors</Text>
+        <View style={styles.matchRow}>
+          {pairs.map((p) => {
+            const isDone = matched.includes(p.color.id);
+            const isSel = selected === p.color.id;
+            return (
+              <Pressable
+                key={p.color.id}
+                disabled={isDone}
+                onPress={() => {
+                  if (isDone) return;
+                  setSelected(p.color.id);
+                  speak(p.color.name);
+                }}
+                style={({ pressed }) => [
+                  styles.matchSwatch,
+                  {
+                    backgroundColor: p.color.hex,
+                    borderColor: isSel ? colors.darkText : '#fff',
+                    opacity: isDone ? 0.4 : pressed ? 0.9 : 1,
+                    transform: [{ scale: isSel ? 1.08 : 1 }],
+                  },
+                ]}
+              >
+                {isSel && !isDone ? <Text style={styles.matchPicked}>✓</Text> : null}
+                {isDone ? <Text style={styles.matchDoneMark}>★</Text> : null}
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
-      <View style={styles.choiceRow}>
-        {[...pairs].reverse().map((p) => (
-          <AnswerCard
-            key={p.emoji}
-            emoji={p.emoji}
-            size={96}
-            correctHighlight={matched.includes(p.color.id)}
-            onPress={() => {
-              if (!selected) return;
-              if (selected === p.color.id) {
-                speak('Match!');
-                const next = [...matched, p.color.id];
-                setMatched(next);
-                setSelected(null);
-                if (next.length === pairs.length) celebrate();
-              } else almost();
-            }}
-          />
-        ))}
+
+      <Text style={styles.matchLink}>↕ Match</Text>
+
+      {/* Things zone */}
+      <View style={[styles.matchZone, { backgroundColor: '#FFF4E8' }]}>
+        <Text style={styles.matchZoneTitle}>Things</Text>
+        <View style={styles.matchRow}>
+          {things.map((p) => {
+            const isDone = matched.includes(p.color.id);
+            const isWrong = wrongId === p.color.id;
+            return (
+              <Pressable
+                key={p.emoji}
+                disabled={isDone}
+                onPress={() => {
+                  if (isDone) return;
+                  if (!selected) {
+                    almost('Pick a color first!');
+                    return;
+                  }
+                  if (selected === p.color.id) {
+                    speak('Match!');
+                    const next = [...matched, p.color.id];
+                    setMatched(next);
+                    setSelected(null);
+                    if (next.length === pairs.length) setTimeout(() => celebrate(), 350);
+                  } else {
+                    setWrongId(p.color.id);
+                    setTimeout(() => setWrongId(null), 450);
+                    almost('Try another one!');
+                  }
+                }}
+                style={({ pressed }) => [
+                  styles.matchThing,
+                  shadows.soft,
+                  isDone && styles.matchThingDone,
+                  isWrong && styles.matchThingWrong,
+                  { opacity: pressed && !isDone ? 0.92 : 1 },
+                ]}
+              >
+                <Text style={styles.matchThingEmoji}>{p.emoji}</Text>
+                {isDone ? (
+                  <View style={styles.matchCheck}>
+                    <Text style={styles.matchCheckText}>✓</Text>
+                  </View>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </ActivityFrame>
   );
@@ -695,6 +780,94 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
+  },
+  matchStatus: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.darkText,
+    textAlign: 'center',
+  },
+  matchZone: {
+    width: '100%',
+    maxWidth: 360,
+    borderRadius: 28,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    gap: 12,
+  },
+  matchZoneTitle: {
+    fontFamily: fonts.label,
+    fontSize: 15,
+    color: colors.secondaryText,
+  },
+  matchRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+    justifyContent: 'center',
+  },
+  matchSwatch: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    borderWidth: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  matchPicked: {
+    color: colors.white,
+    fontFamily: fonts.heading,
+    fontSize: 28,
+    textShadowColor: 'rgba(0,0,0,0.25)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  matchDoneMark: {
+    color: colors.white,
+    fontSize: 28,
+  },
+  matchLink: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.secondaryText,
+  },
+  matchThing: {
+    width: 108,
+    height: 108,
+    borderRadius: 28,
+    backgroundColor: colors.white,
+    borderWidth: 3,
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  matchThingDone: {
+    backgroundColor: '#E8FBE8',
+    borderColor: colors.green,
+  },
+  matchThingWrong: {
+    backgroundColor: '#FFE8E8',
+    borderColor: colors.primaryRed,
+  },
+  matchThingEmoji: {
+    fontSize: 64,
+    lineHeight: 72,
+  },
+  matchCheck: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.green,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  matchCheckText: {
+    color: colors.white,
+    fontFamily: fonts.heading,
+    fontSize: 14,
   },
   sortHint: {
     fontFamily: fonts.label,
