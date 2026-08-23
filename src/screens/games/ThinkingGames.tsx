@@ -13,7 +13,6 @@ export function MemoryGameScreen({ navigation }: RootStackProps<'MemoryGame'>) {
   const { showReward, celebrate, playNext, streak, round } = useGameSession({
     gameId: 'memory',
     skill: 'thinking',
-    prompt,
   });
 
   const faces = useMemo(
@@ -168,7 +167,6 @@ export function OddOneOutScreen({ navigation }: RootStackProps<'OddOneOut'>) {
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
     gameId: 'odd_one',
     skill: 'thinking',
-    prompt: 'Which is different?',
   });
 
   const puzzle = useMemo(() => {
@@ -293,7 +291,6 @@ export function PatternGameScreen({ navigation }: RootStackProps<'PatternGame'>)
     gameId: 'pattern',
     skill: 'thinking',
     dailyTaskId: 'pattern',
-    prompt: 'What comes next?',
   });
 
   const puzzle = useMemo(() => {
@@ -445,7 +442,6 @@ export function SequenceGameScreen({ navigation }: RootStackProps<'SequenceGame'
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
     gameId: 'sequence',
     skill: 'thinking',
-    prompt: 'What comes next?',
   });
 
   const puzzle = useMemo(() => {
@@ -647,7 +643,6 @@ export function SortCategoryScreen({ navigation }: RootStackProps<'SortCategory'
     gameId: 'sort_category',
     skill: 'thinking',
     badge: 'thinker',
-    prompt: 'Sort it out',
   });
 
   const theme = themes[round % themes.length];

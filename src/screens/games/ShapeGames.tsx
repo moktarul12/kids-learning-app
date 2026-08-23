@@ -22,7 +22,6 @@ export function FindShapeScreen({ navigation }: RootStackProps<'FindShape'>) {
     gameId: 'find_shape',
     skill: 'shapes',
     dailyTaskId: 'find_shape',
-    prompt,
   });
   const target = SHAPES[2];
   const items = useMemo(
@@ -97,7 +96,6 @@ export function MatchShapeScreen({ navigation }: RootStackProps<'MatchShape'>) {
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
     gameId: 'match_shape',
     skill: 'shapes',
-    prompt,
   });
   const pairs = useMemo(
     () =>
@@ -297,7 +295,6 @@ export function ShapePuzzleScreen({ navigation }: RootStackProps<'ShapePuzzle'>)
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
     gameId: 'shape_puzzle',
     skill: 'shapes',
-    prompt: 'Finish the picture',
   });
 
   const puzzle = useMemo(() => puzzles[round % puzzles.length], [round]);
@@ -547,7 +544,6 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
     gameId: 'shape_builder',
     skill: 'shapes',
     badge: 'shape_builder',
-    prompt: 'Build with shapes',
   });
 
   const project = useMemo(() => BUILD_PROJECTS[round % BUILD_PROJECTS.length], [round]);
@@ -559,12 +555,8 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
 
   useEffect(() => {
     setPlaced([]);
-    speak(`${project.title}. Tap the shapes.`);
+    speak(`${project.title}. ${parts[0].hint}`);
   }, [round, project.title]);
-
-  useEffect(() => {
-    if (nextPart) speak(nextPart.hint);
-  }, [nextPart?.id, round]);
 
   return (
     <GameShell

@@ -18,7 +18,6 @@ export function NumberIntroScreen({ navigation }: RootStackProps<'NumberIntro'>)
     prompt,
   });
   useEffect(() => setN(1), [round]);
-  useEffect(() => speak(prompt), [n, prompt]);
 
   return (
     <GameShell
@@ -158,7 +157,6 @@ export function CountCollectScreen({ navigation }: RootStackProps<'CountCollect'
   const { showReward, celebrate, playNext, streak, round } = useGameSession({
     gameId: 'count_collect',
     skill: 'numbers',
-    prompt: 'Feed the monster',
   });
 
   const [state, dispatch] = useReducer(feedReducer, { need: 3, given: 0, eaten: {} });
@@ -252,7 +250,6 @@ export function BeforeAfterScreen({ navigation }: RootStackProps<'BeforeAfter'>)
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
     gameId: 'before_after',
     skill: 'numbers',
-    prompt: 'What number?',
   });
   const mode = useMemo(() => (Math.random() > 0.5 ? 'before' : 'after'), [round]);
   const n = useMemo(() => randInt(3, 9), [round]);
@@ -261,7 +258,8 @@ export function BeforeAfterScreen({ navigation }: RootStackProps<'BeforeAfter'>)
     () => shuffle([answer, answer + 1, Math.max(1, answer - 1)]),
     [answer, round],
   );
-  const prompt = mode === 'before' ? `Before ${n}?` : `After ${n}?`;
+  const prompt =
+    mode === 'before' ? `Before ${n}, what number comes?` : `After ${n}, what number comes?`;
   const [picked, setPicked] = useState<number | null>(null);
   const [wrong, setWrong] = useState<number | null>(null);
   const locked = picked === answer;
@@ -442,13 +440,19 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
     const start = randInt(1, 7);
     const full = [start, start + 1, start + 2];
     const answer = full[gap];
+    const known = gap === 0 ? full[1] : gap === 2 ? full[1] : null;
     return {
       type: 'single' as const,
       seq: full.map((v, i) => (i === gap ? null : v)) as (number | null)[],
       answer,
       ask: (gap === 0 ? 'before' : gap === 2 ? 'after' : 'middle') as 'before' | 'after' | 'middle',
       options: threeOpts(answer),
-      prompt: gap === 0 ? 'What comes before?' : gap === 2 ? 'What comes after?' : 'What is missing?',
+      prompt:
+        gap === 0
+          ? `Before ${known}, what number comes?`
+          : gap === 2
+            ? `After ${known}, what number comes?`
+            : 'What number is missing?',
     };
   }, [round]);
 
@@ -478,8 +482,8 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
   const prompt =
     puzzle.type === 'both'
       ? phase === 'before'
-        ? `What comes before ${puzzle.mid}?`
-        : `What comes after ${puzzle.mid}?`
+        ? `Before ${puzzle.mid}, what number comes?`
+        : `After ${puzzle.mid}, what number comes?`
       : puzzle.prompt;
 
   useEffect(() => {
@@ -490,7 +494,7 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
     setWrong(null);
     speak(
       puzzle.type === 'both'
-        ? `Fill both sides. What comes before ${puzzle.mid}?`
+        ? `Fill both sides. Before ${puzzle.mid}, what number comes?`
         : puzzle.prompt,
     );
   }, [round]);
@@ -498,7 +502,7 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
   useEffect(() => {
     if (puzzle.type !== 'both') return;
     if (phase === 'after' && filledBefore != null && filledAfter == null) {
-      speak(`Now what comes after ${puzzle.mid}?`);
+      speak(`After ${puzzle.mid}, what number comes?`);
     }
   }, [phase, puzzle, filledBefore, filledAfter]);
 
@@ -698,11 +702,16 @@ export function NumberTrainScreen({ navigation }: RootStackProps<'NumberTrain'>)
     gameId: 'number_train',
     skill: 'numbers',
     badge: 'number_master',
-    prompt: 'Fix the train',
   });
-  const missing = useMemo(() => randInt(2, 4), [round]);
+  const train = useMemo(() => {
+    const start = randInt(1, 6);
+    const cars = [start, start + 1, start + 2, start + 3, start + 4];
+    const gapIndex = randInt(1, 3); // leave engine ends visible when possible
+    return { cars, missing: cars[gapIndex], gapIndex };
+  }, [round]);
+  const { cars, missing } = train;
   const options = useMemo(
-    () => shuffle([missing, missing + 2, Math.max(1, missing - 1)]),
+    () => shuffle([missing, missing + 2, Math.max(1, missing - 1)].filter((x, i, a) => a.indexOf(x) === i)),
     [missing, round],
   );
   const [wrong, setWrong] = useState<number | null>(null);
@@ -711,10 +720,8 @@ export function NumberTrainScreen({ navigation }: RootStackProps<'NumberTrain'>)
   useEffect(() => {
     setWrong(null);
     setFilled(false);
-    speak('Fix the number train');
+    speak('Fix the train');
   }, [round]);
-
-  const cars = [1, 2, 3, 4, 5];
 
   return (
     <GameShell
@@ -744,7 +751,7 @@ export function NumberTrainScreen({ navigation }: RootStackProps<'NumberTrain'>)
             const isGap = c === missing && !filled;
             const isFilled = c === missing && filled;
             return (
-              <View key={c} style={styles.carWrap}>
+              <View key={`${round}-${c}`} style={styles.carWrap}>
                 <View
                   style={[
                     styles.car,
@@ -812,7 +819,6 @@ export function MoreLessScreen({ navigation }: RootStackProps<'MoreLess'>) {
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
     gameId: 'more_less',
     skill: 'numbers',
-    prompt: 'Which has more?',
   });
 
   const roundData = useMemo(() => {

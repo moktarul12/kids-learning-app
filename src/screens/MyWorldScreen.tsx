@@ -18,7 +18,6 @@ import { BACKGROUNDS } from '../data/colorActivities';
 import { WORLDS as WORLD_META } from '../data/catalog';
 import { MainTabParamList, RootStackParamList } from '../navigation/types';
 import { colors, fonts, radii, shadows } from '../theme';
-import { speak } from '../services/voice';
 import type { WorldId } from '../data/catalog';
 
 type Props = CompositeScreenProps<
@@ -115,7 +114,6 @@ export function MyWorldScreen({ navigation }: Props) {
               <Pressable
                 key={w.id}
                 onPress={() => {
-                  speak(w.label);
                   navigation.navigate('WorldHub', { worldId: w.id });
                 }}
                 style={({ pressed }) => [

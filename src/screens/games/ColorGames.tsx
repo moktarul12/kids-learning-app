@@ -82,7 +82,6 @@ export function LearnColorScreen({ navigation }: RootStackProps<'LearnColor'>) {
     gameId: 'learn_color',
     skill: 'colors',
     badge: 'color_explorer',
-    prompt: `This is ${step.name}`,
   });
 
   useEffect(() => setIdx(0), [round]);
@@ -337,7 +336,6 @@ export function SortColorScreen({ navigation }: RootStackProps<'SortColor'>) {
   const { showReward, celebrate, almost, playNext, streak, round, hint } = useGameSession({
     gameId: 'sort_color',
     skill: 'colors',
-    prompt: 'Sort into baskets',
   });
 
   const set = SORT_SETS[round % SORT_SETS.length];
@@ -455,7 +453,6 @@ export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
   const { showReward, celebrate, almost, playNext, streak, round, hint } = useGameSession({
     gameId: 'match_color',
     skill: 'colors',
-    prompt: 'Match the colors',
   });
 
   const base = MATCH_SETS[round % MATCH_SETS.length];
@@ -479,6 +476,7 @@ export function MatchColorScreen({ navigation }: RootStackProps<'MatchColor'>) {
     setSelected(null);
     setMatched([]);
     setWrongId(null);
+    speak('Match the colors');
   }, [round]);
 
   const status =
