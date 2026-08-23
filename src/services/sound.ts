@@ -1,5 +1,4 @@
-import { Audio, AVPlaybackStatusSuccess } from 'expo-av';
-import { Platform } from 'react-native';
+import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 
 type SoundKey = 'bg' | 'applause' | 'chime';
 
@@ -12,40 +11,28 @@ const SOURCES = {
 let musicEnabled = true;
 let sfxEnabled = true;
 let ready = false;
-let bg: Audio.Sound | null = null;
-let applause: Audio.Sound | null = null;
-let chime: Audio.Sound | null = null;
-let ducked = false;
+let bg: AudioPlayer | null = null;
+let applause: AudioPlayer | null = null;
+let chime: AudioPlayer | null = null;
 
-async function ensureMode() {
-  await Audio.setAudioModeAsync({
-    playsInSilentModeIOS: true,
-    allowsRecordingIOS: false,
-    staysActiveInBackground: false,
-    shouldDuckAndroid: true,
-    playThroughEarpieceAndroid: false,
-  });
-}
-
-async function load(key: SoundKey) {
-  const { sound } = await Audio.Sound.createAsync(SOURCES[key], {
-    shouldPlay: false,
-    isLooping: key === 'bg',
-    volume: key === 'bg' ? 0.22 : 0.85,
-  });
-  return sound;
+function makePlayer(key: SoundKey): AudioPlayer {
+  const player = createAudioPlayer(SOURCES[key]);
+  player.loop = key === 'bg';
+  player.volume = key === 'bg' ? 0.22 : 0.85;
+  return player;
 }
 
 /** Call once when the app is ready */
 export async function initSound() {
-  if (ready || Platform.OS === 'web') {
-    // Web: still try — expo-av works on web in many cases
-  }
+  if (ready) return;
   try {
-    await ensureMode();
-    bg = await load('bg');
-    applause = await load('applause');
-    chime = await load('chime');
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      allowsRecording: false,
+    });
+    bg = makePlayer('bg');
+    applause = makePlayer('applause');
+    chime = makePlayer('chime');
     ready = true;
     if (musicEnabled) await playMusic();
   } catch {
@@ -57,8 +44,7 @@ export async function initSound() {
 export async function playMusic() {
   if (!musicEnabled || !bg) return;
   try {
-    const st = (await bg.getStatusAsync()) as AVPlaybackStatusSuccess;
-    if (st.isLoaded && !st.isPlaying) await bg.playAsync();
+    if (!bg.playing) bg.play();
   } catch {
     /* ignore */
   }
@@ -67,7 +53,7 @@ export async function playMusic() {
 export async function pauseMusic() {
   if (!bg) return;
   try {
-    await bg.pauseAsync();
+    bg.pause();
   } catch {
     /* ignore */
   }
@@ -75,9 +61,8 @@ export async function pauseMusic() {
 
 export async function duckMusic(on: boolean) {
   if (!bg || !musicEnabled) return;
-  ducked = on;
   try {
-    await bg.setVolumeAsync(on ? 0.06 : 0.22);
+    bg.volume = on ? 0.06 : 0.22;
   } catch {
     /* ignore */
   }
@@ -89,12 +74,12 @@ export async function playSuccessFanfare() {
   try {
     await duckMusic(true);
     if (chime) {
-      await chime.setPositionAsync(0);
-      await chime.playAsync();
+      await chime.seekTo(0);
+      chime.play();
     }
     if (applause) {
-      await applause.setPositionAsync(0);
-      await applause.playAsync();
+      await applause.seekTo(0);
+      applause.play();
     }
     setTimeout(() => {
       duckMusic(false).catch(() => {});
@@ -121,7 +106,7 @@ export function isMusicEnabled() {
 export async function unloadSound() {
   for (const s of [bg, applause, chime]) {
     try {
-      await s?.unloadAsync();
+      s?.remove();
     } catch {
       /* ignore */
     }
