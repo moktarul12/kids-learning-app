@@ -47,28 +47,43 @@ export function NumberIntroScreen({ navigation }: RootStackProps<'NumberIntro'>)
 }
 
 export function CountObjectsScreen({ navigation }: RootStackProps<'CountObjects'>) {
-  const prompt = 'How many apples?';
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
     gameId: 'count_objects',
     skill: 'numbers',
     dailyTaskId: 'count_five',
-    prompt,
   });
+  const item = useMemo(() => {
+    const banks = [
+      { emoji: '🍎', plural: 'apples' },
+      { emoji: '⭐', plural: 'stars' },
+      { emoji: '🎈', plural: 'balloons' },
+      { emoji: '🍪', plural: 'cookies' },
+      { emoji: '🐠', plural: 'fish' },
+      { emoji: '🌸', plural: 'flowers' },
+      { emoji: '🚗', plural: 'cars' },
+      { emoji: '🦋', plural: 'butterflies' },
+      { emoji: '🧁', plural: 'cupcakes' },
+      { emoji: '🍊', plural: 'oranges' },
+    ];
+    return banks[randInt(0, banks.length - 1)];
+  }, [round]);
   const count = useMemo(() => randInt(2, 8), [round]);
   const options = useMemo(() => shuffle([count, count + 1, Math.max(1, count - 1)]), [count, round]);
   const [picked, setPicked] = useState<number | null>(null);
   const [wrong, setWrong] = useState<number | null>(null);
+  const prompt = `How many ${item.plural}?`;
 
   useEffect(() => {
     setPicked(null);
     setWrong(null);
-  }, [round]);
+    speak(prompt);
+  }, [round, prompt]);
 
   return (
     <GameShell
       title="Count"
       prompt={prompt}
-      promptEmoji="🍎"
+      promptEmoji={item.emoji}
       round={round}
       onBack={() => navigation.goBack()}
       backLabel="Number World"
@@ -78,18 +93,17 @@ export function CountObjectsScreen({ navigation }: RootStackProps<'CountObjects'
       streak={streak}
       hint={hint}
     >
-      {/* Orchard stage — big apples to count */}
       <View style={styles.orchard}>
-        <Text style={styles.orchardLabel}>Count the apples</Text>
+        <Text style={styles.orchardLabel}>Count the {item.plural}</Text>
         <View style={styles.appleGrid}>
           {Array.from({ length: count }).map((_, i) => (
             <LivingIcon key={`${round}-${i}`} motion="bob">
-              <Text style={styles.apple}>{['🍎', '🍏'][i % 2]}</Text>
+              <Text style={styles.apple}>{item.emoji}</Text>
             </LivingIcon>
           ))}
         </View>
         <View style={styles.basketHint}>
-          <Text style={styles.basketEmoji}>🧺</Text>
+          <Text style={styles.basketEmoji}>👆</Text>
           <Text style={styles.basketText}>Tap the number below</Text>
         </View>
       </View>
@@ -159,10 +173,22 @@ export function CountCollectScreen({ navigation }: RootStackProps<'CountCollect'
     skill: 'numbers',
   });
 
+  const food = useMemo(() => {
+    const foods = [
+      { emoji: '🍎', plural: 'apples' },
+      { emoji: '🍪', plural: 'cookies' },
+      { emoji: '🍌', plural: 'bananas' },
+      { emoji: '🧁', plural: 'cupcakes' },
+      { emoji: '🍇', plural: 'grapes' },
+      { emoji: '🥕', plural: 'carrots' },
+    ];
+    return foods[round % foods.length];
+  }, [round]);
+
   const [state, dispatch] = useReducer(feedReducer, { need: 3, given: 0, eaten: {} });
   const { need, given, eaten } = state;
   const traySize = need + 2;
-  const prompt = `Give ${need} apples`;
+  const prompt = `Give ${need} ${food.plural}`;
   const full = given >= need;
   const monsterFace = full ? '🤤' : given > 0 ? '😋' : '👾';
   const prevGiven = useRef(0);
@@ -171,8 +197,8 @@ export function CountCollectScreen({ navigation }: RootStackProps<'CountCollect'
     const n = randInt(3, 6);
     prevGiven.current = 0;
     dispatch({ type: 'reset', need: n });
-    speak(`Give ${n} apples`);
-  }, [round]);
+    speak(`Give ${n} ${food.plural}`);
+  }, [round, food.plural]);
 
   useEffect(() => {
     if (given <= 0 || given <= prevGiven.current) {
@@ -185,7 +211,7 @@ export function CountCollectScreen({ navigation }: RootStackProps<'CountCollect'
       const t = setTimeout(() => celebrate('Yum!'), 280);
       return () => clearTimeout(t);
     }
-  }, [given, need]); // celebrate is stable enough for timeout; omit to avoid canceling win
+  }, [given, need]);
 
   return (
     <GameShell
@@ -216,18 +242,18 @@ export function CountCollectScreen({ navigation }: RootStackProps<'CountCollect'
         <View style={styles.feedPlate}>
           {Array.from({ length: need }).map((_, i) => (
             <View key={`slot-${i}`} style={[styles.feedSlot, i < given && styles.feedSlotFilled]}>
-              <Text style={styles.feedSlotEmoji}>{i < given ? '🍎' : ''}</Text>
+              <Text style={styles.feedSlotEmoji}>{i < given ? food.emoji : ''}</Text>
             </View>
           ))}
         </View>
 
-        <Text style={styles.feedTrayHint}>{full ? 'All full!' : 'Tap an apple!'}</Text>
+        <Text style={styles.feedTrayHint}>{full ? 'All full!' : `Tap a ${food.plural.slice(0, -1)}!`}</Text>
         <View style={styles.feedTray}>
           {Array.from({ length: traySize }).map((_, i) => {
             const used = !!eaten[i];
             return (
               <Pressable
-                key={`apple-${round}-${i}`}
+                key={`food-${round}-${i}`}
                 onPress={() => dispatch({ type: 'feed', index: i })}
                 hitSlop={8}
                 style={({ pressed }) => [
@@ -236,7 +262,7 @@ export function CountCollectScreen({ navigation }: RootStackProps<'CountCollect'
                   { opacity: pressed && !used ? 0.85 : 1 },
                 ]}
               >
-                <Text style={styles.feedAppleEmoji}>{used ? '✨' : '🍎'}</Text>
+                <Text style={styles.feedAppleEmoji}>{used ? '✨' : food.emoji}</Text>
               </Pressable>
             );
           })}

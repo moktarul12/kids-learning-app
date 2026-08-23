@@ -37,11 +37,13 @@ export function AppShell({
 /* ───────── IconButton ───────── */
 export function IconButton({
   emoji,
+  image,
   onPress,
   accessibilityLabel,
   color = colors.primaryBlue,
 }: {
-  emoji: string;
+  emoji?: string;
+  image?: ImageSourcePropType;
   onPress?: () => void;
   accessibilityLabel: string;
   color?: string;
@@ -50,13 +52,17 @@ export function IconButton({
     <Pressable
       onPress={onPress}
       accessibilityLabel={accessibilityLabel}
-      hitSlop={8}
+      hitSlop={10}
       style={({ pressed }) => [
         styles.iconBtn,
-        { backgroundColor: color, opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.94 : 1 }] },
+        { backgroundColor: image ? 'transparent' : color, opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.94 : 1 }] },
       ]}
     >
-      <Text style={styles.iconBtnText}>{emoji}</Text>
+      {image ? (
+        <Image source={image} style={styles.iconBtnImage} resizeMode="contain" />
+      ) : (
+        <Text style={styles.iconBtnText}>{emoji}</Text>
+      )}
     </Pressable>
   );
 }
@@ -121,10 +127,14 @@ export function AppHeader({
   const leftSlot =
     left === 'avatar' && !backTo ? (
       <View style={styles.avatar}>
-        <Text style={{ fontSize: 22 }}>🧒</Text>
+        <Image source={require('../../assets/logo.png')} style={styles.avatarLogo} resizeMode="cover" />
       </View>
     ) : showBack ? (
-      <IconButton emoji="←" onPress={goBack} accessibilityLabel="Back" />
+      <IconButton
+        image={require('../../assets/icons/back_arrow.png')}
+        onPress={goBack}
+        accessibilityLabel="Back"
+      />
     ) : (
       <View style={styles.headerSide} />
     );
@@ -386,14 +396,15 @@ const styles = StyleSheet.create({
   shellContent: { flex: 1 },
 
   iconBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadows.soft,
   },
   iconBtnText: { fontSize: 22, color: colors.white },
+  iconBtnImage: { width: 52, height: 52 },
 
   rewards: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   pill: {
@@ -466,8 +477,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2.5,
     borderColor: colors.primaryBlue,
+    overflow: 'hidden',
     ...shadows.soft,
   },
+  avatarLogo: { width: 48, height: 48 },
   appHeaderMid: {
     flex: 1,
     alignItems: 'center',

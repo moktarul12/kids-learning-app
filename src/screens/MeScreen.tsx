@@ -1,13 +1,21 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  Linking,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppShell, AppHeader, ContentStage, RewardCounter } from '../components/ui';
-import { FoxMascot } from '../components/FoxMascot';
 import { BACKGROUNDS } from '../data/colorActivities';
 import { useProgress, BadgeId } from '../state/ProgressContext';
-import { colors, fonts, radii, shadows } from '../theme';
+import { colors, fonts, shadows } from '../theme';
 import { MainTabParamList, RootStackParamList } from '../navigation/types';
 import { speak } from '../services/voice';
 
@@ -33,8 +41,28 @@ const SKILLS = [
   { id: 'creativity' as const, label: 'Creativity', emoji: '🎨' },
 ];
 
+const PLAY_STORE_HINT =
+  'Try Kiddo — Learn · Explore · Grow!\nhttps://dromominds.in';
+
 export function MeScreen({ navigation }: Props) {
   const { stars, coins, gems, skillStars, badges } = useProgress();
+
+  const shareApp = async () => {
+    try {
+      speak('Share Kiddo');
+      await Share.share({
+        message: PLAY_STORE_HINT,
+        title: 'Kiddo',
+      });
+    } catch {
+      /* user cancelled */
+    }
+  };
+
+  const openAbout = () => {
+    speak('About us');
+    Linking.openURL('https://dromominds.in').catch(() => {});
+  };
 
   return (
     <AppShell background={BACKGROUNDS.myWorld}>
@@ -43,7 +71,9 @@ export function MeScreen({ navigation }: Props) {
         <ContentStage>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.inner}>
             <View style={styles.mascot}>
-              <FoxMascot mood="proud" size={72} />
+              <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+              <Text style={styles.appName}>Kiddo</Text>
+              <Text style={styles.version}>Version 1.0.0</Text>
             </View>
             <View style={styles.currency}>
               <RewardCounter stars={stars} coins={coins} />
@@ -102,6 +132,19 @@ export function MeScreen({ navigation }: Props) {
               <Text style={{ fontSize: 24 }}>🗺️</Text>
               <Text style={styles.dailyText}>Daily Adventure</Text>
             </Pressable>
+
+            <Pressable style={[styles.share, shadows.soft]} onPress={shareApp}>
+              <Text style={{ fontSize: 24 }}>📤</Text>
+              <Text style={styles.shareText}>Share App</Text>
+            </Pressable>
+
+            <Pressable style={[styles.about, shadows.soft]} onPress={openAbout}>
+              <Text style={{ fontSize: 24 }}>ℹ️</Text>
+              <View style={styles.aboutCopy}>
+                <Text style={styles.aboutText}>About Us</Text>
+                <Text style={styles.aboutUrl}>dromominds.in</Text>
+              </View>
+            </Pressable>
           </ScrollView>
         </ContentStage>
       </View>
@@ -112,7 +155,10 @@ export function MeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   body: { flex: 1, paddingHorizontal: 14, paddingBottom: 8 },
   inner: { gap: 8, paddingBottom: 12 },
-  mascot: { alignItems: 'center', marginBottom: 4 },
+  mascot: { alignItems: 'center', marginBottom: 4, gap: 2 },
+  logo: { width: 88, height: 88 },
+  appName: { fontFamily: fonts.heading, fontSize: 22, color: colors.darkText },
+  version: { fontFamily: fonts.label, fontSize: 12, color: colors.secondaryText },
   currency: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -185,4 +231,26 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   dailyText: { fontFamily: fonts.heading, color: colors.white, fontSize: 18 },
+  share: {
+    backgroundColor: '#5ECF5A',
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  shareText: { fontFamily: fonts.heading, color: colors.white, fontSize: 18 },
+  about: {
+    backgroundColor: colors.white,
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 2,
+    borderColor: '#D7E6F7',
+  },
+  aboutCopy: { flex: 1 },
+  aboutText: { fontFamily: fonts.heading, color: colors.darkText, fontSize: 18 },
+  aboutUrl: { fontFamily: fonts.label, color: colors.primaryBlue, fontSize: 13, marginTop: 2 },
 });

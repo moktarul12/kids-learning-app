@@ -1,16 +1,8 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { RootStackProps } from '../navigation/types';
 import { WorldScene } from '../components/SkyBackground';
-import { FoxMascot } from '../components/FoxMascot';
 import { useProgress } from '../state/ProgressContext';
-
-const LETTERS = [
-  { ch: 'K', color: '#FF5A5A' },
-  { ch: 'I', color: '#FFD93D' },
-  { ch: 'D', color: '#5ECF5A' },
-  { ch: 'S', color: '#4BA3FF' },
-];
 
 /** Screen 1 — Splash */
 export function SplashScreen({ navigation }: RootStackProps<'Splash'>) {
@@ -28,27 +20,22 @@ export function SplashScreen({ navigation }: RootStackProps<'Splash'>) {
   return (
     <WorldScene mood="night">
       <View style={styles.center}>
-        <FoxMascot mood="excited" size={100} />
-        <View style={styles.brandRow}>
-          {LETTERS.map((l) => (
-            <Text key={l.ch} style={[styles.letter, { color: l.color }]}>
-              {l.ch}
-            </Text>
-          ))}
-        </View>
-        <Text style={styles.tag}>Play · Learn · Create</Text>
+        <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+        <Text style={styles.brand}>Kiddo</Text>
+        <Text style={styles.tag}>Learn · Explore · Grow</Text>
       </View>
     </WorldScene>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 },
-  brandRow: { flexDirection: 'row', gap: 2, marginTop: 6 },
-  letter: {
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 24 },
+  logo: { width: 200, height: 200 },
+  brand: {
     fontFamily: 'Fredoka_700Bold',
-    fontSize: 52,
-    textShadowColor: 'rgba(0,0,0,0.3)',
+    fontSize: 44,
+    color: '#FFF',
+    textShadowColor: 'rgba(0,0,0,0.25)',
     textShadowRadius: 4,
     textShadowOffset: { width: 0, height: 2 },
   },

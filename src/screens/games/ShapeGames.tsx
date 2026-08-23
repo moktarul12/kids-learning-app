@@ -434,110 +434,123 @@ export function ShapePuzzleScreen({ navigation }: RootStackProps<'ShapePuzzle'>)
   );
 }
 
-const BUILD_PROJECTS = [
-  {
-    id: 'rocket',
-    title: 'Build a rocket',
-    doneTitle: 'Ready for launch!',
-    guide: '🧑‍🚀',
-    doneEmoji: '🚀',
-    reward: 'Blast off!',
-    padLabel: 'Your rocket',
-    tint: '#E8F4FF',
-    border: '#A8D4F0',
-    parts: [
-      { id: 'nose', emoji: '🔺', label: 'Nose', hint: 'Add the pointy nose' },
-      { id: 'body', emoji: '🟥', label: 'Body', hint: 'Add the rocket body' },
-      { id: 'window', emoji: '⭕', label: 'Window', hint: 'Add the round window' },
-      { id: 'fin', emoji: '🟦', label: 'Fin', hint: 'Add the blue fin' },
-    ],
-  },
+const BUILD_PICTURES = [
   {
     id: 'house',
-    title: 'Build a house',
-    doneTitle: 'Home sweet home!',
-    guide: '🦊',
+    title: 'Finish the house',
+    ask: 'Which shape is the roof?',
+    almost: 'The roof is a triangle!',
     doneEmoji: '🏠',
-    reward: 'Nice house!',
-    padLabel: 'Your house',
-    tint: '#FFF4E0',
-    border: '#FFD59A',
-    parts: [
-      { id: 'roof', emoji: '🔺', label: 'Roof', hint: 'Add the triangle roof' },
-      { id: 'wall', emoji: '🟧', label: 'Wall', hint: 'Add the square wall' },
-      { id: 'door', emoji: '🚪', label: 'Door', hint: 'Add the door' },
-      { id: 'window', emoji: '🟦', label: 'Window', hint: 'Add the window' },
+    answer: 'triangle',
+    layout: [
+      { kind: 'gap', shape: 'triangle' },
+      { kind: 'filled', emoji: '🟧', label: 'Wall' },
+      { kind: 'filled', emoji: '🚪', label: 'Door' },
+    ],
+    options: [
+      { id: 'triangle', emoji: '🔺', label: 'Triangle' },
+      { id: 'circle', emoji: '⭕', label: 'Circle' },
+      { id: 'square', emoji: '🟦', label: 'Square' },
     ],
   },
   {
-    id: 'ice_cream',
-    title: 'Build ice cream',
-    doneTitle: 'Yummy cone!',
-    guide: '🐰',
+    id: 'sun',
+    title: 'Finish the sun',
+    ask: 'Which shape is the sun?',
+    almost: 'The sun is a circle!',
+    doneEmoji: '☀️',
+    answer: 'circle',
+    layout: [
+      { kind: 'gap', shape: 'circle' },
+      { kind: 'filled', emoji: '✨', label: 'Rays' },
+      { kind: 'filled', emoji: '☁️', label: 'Cloud' },
+    ],
+    options: [
+      { id: 'square', emoji: '🟦', label: 'Square' },
+      { id: 'circle', emoji: '⭕', label: 'Circle' },
+      { id: 'triangle', emoji: '🔺', label: 'Triangle' },
+    ],
+  },
+  {
+    id: 'ice',
+    title: 'Finish ice cream',
+    ask: 'Which shape is the cone?',
+    almost: 'The cone is a triangle!',
     doneEmoji: '🍦',
-    reward: 'Yum!',
-    padLabel: 'Your treat',
-    tint: '#FFE8F0',
-    border: '#FFB0C8',
-    parts: [
-      { id: 'scoop1', emoji: '🔴', label: 'Pink', hint: 'Add a pink scoop' },
-      { id: 'scoop2', emoji: '🟤', label: 'Choco', hint: 'Add a chocolate scoop' },
-      { id: 'cone', emoji: '🔺', label: 'Cone', hint: 'Add the cone' },
-      { id: 'cherry', emoji: '🍒', label: 'Cherry', hint: 'Add the cherry on top' },
+    answer: 'triangle',
+    layout: [
+      { kind: 'filled', emoji: '🩷', label: 'Scoop' },
+      { kind: 'gap', shape: 'triangle' },
+      { kind: 'filled', emoji: '🍒', label: 'Cherry' },
+    ],
+    options: [
+      { id: 'circle', emoji: '⭕', label: 'Circle' },
+      { id: 'triangle', emoji: '🔺', label: 'Triangle' },
+      { id: 'star', emoji: '⭐', label: 'Star' },
     ],
   },
   {
-    id: 'robot',
-    title: 'Build a robot',
-    doneTitle: 'Beep boop!',
-    guide: '🦾',
-    doneEmoji: '🤖',
-    reward: 'Robot power!',
-    padLabel: 'Your robot',
-    tint: '#E8FFF4',
-    border: '#A8E8C8',
-    parts: [
-      { id: 'head', emoji: '⬜', label: 'Head', hint: 'Add the robot head' },
-      { id: 'eyes', emoji: '👀', label: 'Eyes', hint: 'Add the eyes' },
-      { id: 'body', emoji: '🟩', label: 'Body', hint: 'Add the body' },
-      { id: 'legs', emoji: '🦿', label: 'Legs', hint: 'Add the legs' },
+    id: 'window',
+    title: 'Finish the window',
+    ask: 'Which shape is the window?',
+    almost: 'The window is a square!',
+    doneEmoji: '🪟',
+    answer: 'square',
+    layout: [
+      { kind: 'filled', emoji: '🏠', label: 'House' },
+      { kind: 'gap', shape: 'square' },
+      { kind: 'filled', emoji: '🌳', label: 'Tree' },
+    ],
+    options: [
+      { id: 'triangle', emoji: '🔺', label: 'Triangle' },
+      { id: 'square', emoji: '🟦', label: 'Square' },
+      { id: 'circle', emoji: '⭕', label: 'Circle' },
     ],
   },
   {
-    id: 'flower',
-    title: 'Build a flower',
-    doneTitle: 'Pretty flower!',
-    guide: '🐝',
-    doneEmoji: '🌸',
-    reward: 'Bloom!',
-    padLabel: 'Your flower',
-    tint: '#F3E8FF',
-    border: '#D4B8F8',
-    parts: [
-      { id: 'petal', emoji: '🩷', label: 'Petal', hint: 'Add a petal' },
-      { id: 'center', emoji: '🟡', label: 'Center', hint: 'Add the yellow center' },
-      { id: 'stem', emoji: '🟩', label: 'Stem', hint: 'Add the green stem' },
-      { id: 'leaf', emoji: '🍃', label: 'Leaf', hint: 'Add a leaf' },
-    ],
-  },
-  {
-    id: 'car',
-    title: 'Build a car',
-    doneTitle: 'Vroom vroom!',
-    guide: '🏎️',
+    id: 'wheel',
+    title: 'Finish the car',
+    ask: 'Which shape is the wheel?',
+    almost: 'Wheels are circles!',
     doneEmoji: '🚗',
-    reward: 'Let’s go!',
-    padLabel: 'Your car',
-    tint: '#E8F8FF',
-    border: '#A8D8F8',
-    parts: [
-      { id: 'body', emoji: '🟥', label: 'Body', hint: 'Add the car body' },
-      { id: 'window', emoji: '🟦', label: 'Window', hint: 'Add the window' },
-      { id: 'wheel1', emoji: '⚫', label: 'Wheel', hint: 'Add a wheel' },
-      { id: 'wheel2', emoji: '⭕', label: 'Tire', hint: 'Add another tire' },
+    answer: 'circle',
+    layout: [
+      { kind: 'filled', emoji: '🟥', label: 'Body' },
+      { kind: 'gap', shape: 'circle' },
+      { kind: 'filled', emoji: '🪟', label: 'Window' },
+    ],
+    options: [
+      { id: 'circle', emoji: '⭕', label: 'Circle' },
+      { id: 'square', emoji: '🟦', label: 'Square' },
+      { id: 'star', emoji: '⭐', label: 'Star' },
+    ],
+  },
+  {
+    id: 'rocket',
+    title: 'Finish the rocket',
+    ask: 'Which shape is the nose?',
+    almost: 'The nose is a triangle!',
+    doneEmoji: '🚀',
+    answer: 'triangle',
+    layout: [
+      { kind: 'gap', shape: 'triangle' },
+      { kind: 'filled', emoji: '🟥', label: 'Body' },
+      { kind: 'filled', emoji: '🔥', label: 'Fire' },
+    ],
+    options: [
+      { id: 'square', emoji: '🟦', label: 'Square' },
+      { id: 'triangle', emoji: '🔺', label: 'Triangle' },
+      { id: 'circle', emoji: '⭕', label: 'Circle' },
     ],
   },
 ] as const;
+
+const SHAPE_EMOJI: Record<string, string> = {
+  triangle: '🔺',
+  circle: '⭕',
+  square: '🟦',
+  star: '⭐',
+};
 
 export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'>) {
   const { showReward, celebrate, almost, playNext, streak, round, hint } = useGameSession({
@@ -546,114 +559,115 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
     badge: 'shape_builder',
   });
 
-  const project = useMemo(() => BUILD_PROJECTS[round % BUILD_PROJECTS.length], [round]);
-  const parts = project.parts;
-  const [placed, setPlaced] = useState<string[]>([]);
-  const nextPart = parts.find((p) => !placed.includes(p.id));
-  const done = placed.length === parts.length;
-  const prompt = nextPart ? nextPart.hint : project.doneTitle;
+  const picture = useMemo(() => BUILD_PICTURES[round % BUILD_PICTURES.length], [round]);
+  const options = useMemo(() => shuffle([...picture.options]), [picture, round]);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [wrong, setWrong] = useState<string | null>(null);
+  const locked = picked === picture.answer;
 
   useEffect(() => {
-    setPlaced([]);
-    speak(`${project.title}. ${parts[0].hint}`);
-  }, [round, project.title]);
+    setPicked(null);
+    setWrong(null);
+    speak(picture.ask);
+  }, [round, picture.ask]);
 
   return (
     <GameShell
       title="Shape Builder"
-      prompt={prompt}
-      promptEmoji={project.doneEmoji}
+      prompt={picture.ask}
+      promptEmoji={picture.doneEmoji}
       round={round}
-      progressCurrent={placed.length}
-      progressTotal={parts.length}
       onBack={() => navigation.goBack()}
       backLabel="Shape World"
       backEmoji="🔷"
       showReward={showReward}
       onNext={playNext}
       streak={streak}
-      rewardMessage={project.reward}
+      rewardMessage="Nice build!"
       hint={hint}
     >
-      <View style={[styles.buildStage, { backgroundColor: project.tint, borderColor: project.border }]}>
+      <View style={[styles.buildStage, { backgroundColor: '#E8F4FF', borderColor: '#A8D4F0' }]}>
         <View style={styles.buildBanner}>
-          <LivingIcon motion={done ? 'pulse' : 'bob'}>
-            <Text style={styles.buildHero}>{done ? project.doneEmoji : project.guide}</Text>
+          <LivingIcon motion={locked ? 'pulse' : 'bob'}>
+            <Text style={styles.buildHero}>{locked ? picture.doneEmoji : '🧱'}</Text>
           </LivingIcon>
           <View style={styles.buildBannerCopy}>
-            <Text style={styles.buildBannerTitle}>{done ? project.doneTitle : project.title}</Text>
+            <Text style={styles.buildBannerTitle}>{picture.title}</Text>
             <Text style={styles.buildBannerSub}>
-              {done ? 'Amazing work!' : `Step ${placed.length + 1} of ${parts.length}`}
-            </Text>
-          </View>
-          <View style={styles.buildCountBadge}>
-            <Text style={styles.buildCountText}>
-              {placed.length}/{parts.length}
+              {locked ? 'Picture complete!' : 'Tap the missing shape'}
             </Text>
           </View>
         </View>
 
         <View style={styles.buildPad}>
-          <Text style={styles.buildPadTitle}>{project.padLabel}</Text>
+          <Text style={styles.buildPadTitle}>Your picture</Text>
           <View style={styles.buildStack}>
-            {parts.map((p) => {
-              const on = placed.includes(p.id);
+            {picture.layout.map((slot, i) => {
+              const isGap = slot.kind === 'gap';
+              const filled = isGap && locked;
               return (
-                <View key={p.id} style={[styles.buildSlot, on ? styles.buildSlotOn : styles.buildSlotOff]}>
-                  <Text style={[styles.buildSlotEmoji, !on && styles.buildSlotGhost]}>{p.emoji}</Text>
-                  <Text style={[styles.buildSlotLabel, !on && { opacity: 0.55 }]}>{p.label}</Text>
+                <View
+                  key={`${picture.id}-${i}`}
+                  style={[
+                    styles.buildSlot,
+                    isGap && !filled && styles.buildSlotOff,
+                    (filled || !isGap) && styles.buildSlotOn,
+                  ]}
+                >
+                  {isGap && !filled ? (
+                    <LivingIcon motion="pulse">
+                      <Text style={styles.buildSlotEmoji}>❓</Text>
+                    </LivingIcon>
+                  ) : (
+                    <Text style={styles.buildSlotEmoji}>
+                      {isGap ? SHAPE_EMOJI[picture.answer] : slot.emoji}
+                    </Text>
+                  )}
+                  <Text style={styles.buildSlotLabel}>
+                    {isGap ? (filled ? 'Done' : 'Missing') : slot.label}
+                  </Text>
                 </View>
               );
             })}
           </View>
-          {done ? (
+          {locked ? (
             <LivingIcon motion="pulse">
-              <Text style={styles.buildDoneRocket}>{project.doneEmoji}</Text>
+              <Text style={styles.buildDoneRocket}>{picture.doneEmoji}</Text>
             </LivingIcon>
           ) : null}
         </View>
 
-        <Text style={styles.buildTapHint}>
-          {done ? 'All parts on!' : nextPart ? `Tap ${nextPart.label} ${nextPart.emoji}` : 'Tap a shape'}
-        </Text>
+        <Text style={styles.buildTapHint}>{locked ? 'Great job!' : 'Pick the shape that fits'}</Text>
 
         <View style={styles.buildParts}>
-          {parts.map((p) => {
-            const on = placed.includes(p.id);
-            const isNext = nextPart?.id === p.id;
+          {options.map((o) => {
+            const isRight = locked && o.id === picture.answer;
+            const isWrong = wrong === o.id;
             return (
               <Pressable
-                key={`${project.id}-${p.id}`}
-                disabled={on || (!!nextPart && p.id !== nextPart.id)}
+                key={`${round}-${o.id}`}
+                disabled={locked}
                 onPress={() => {
-                  if (on) return;
-                  if (nextPart && p.id !== nextPart.id) {
-                    almost(`First tap the ${nextPart.label}!`);
-                    return;
-                  }
-                  const next = [...placed, p.id];
-                  setPlaced(next);
-                  speak(p.label);
-                  if (next.length === parts.length) {
-                    setTimeout(() => celebrate(project.reward), 500);
+                  if (o.id === picture.answer) {
+                    setPicked(o.id);
+                    speak(o.label);
+                    setTimeout(() => celebrate('Nice build!'), 450);
+                  } else {
+                    setWrong(o.id);
+                    setTimeout(() => setWrong(null), 450);
+                    almost(picture.almost);
                   }
                 }}
                 style={({ pressed }) => [
                   styles.buildPartBtn,
-                  isNext && styles.buildPartNext,
-                  on && styles.buildPartDone,
-                  { opacity: pressed && !on ? 0.9 : on ? 0.55 : 1 },
+                  isRight && styles.buildPartNext,
+                  isWrong && styles.buildPartDone,
+                  { opacity: pressed && !locked ? 0.9 : 1 },
                 ]}
               >
-                <Text style={styles.buildPartEmoji}>{p.emoji}</Text>
-                <Text style={styles.buildPartLabel}>{p.label}</Text>
-                {on ? (
-                  <View style={styles.buildPartCheck}>
-                    <Text style={styles.buildPartCheckText}>✓</Text>
-                  </View>
-                ) : isNext ? (
-                  <Text style={styles.buildPartTap}>TAP</Text>
-                ) : null}
+                <Text style={styles.buildPartEmoji}>{o.emoji}</Text>
+                <Text style={styles.buildPartLabel}>{o.label}</Text>
+                {isRight ? <Text style={styles.buildPartTap}>✓</Text> : null}
               </Pressable>
             );
           })}
@@ -662,6 +676,7 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
     </GameShell>
   );
 }
+
 
 const styles = StyleSheet.create({
   grid: {

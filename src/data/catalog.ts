@@ -43,7 +43,7 @@ export const GAMES: GameDef[] = [
   { id: 'more_less', title: 'More or Less', emoji: '⚖️', world: 'number', route: 'MoreLess', blurb: 'Which has more?', kind: 'quiz' },
   // Shape
   { id: 'find_shape', title: 'Find Shapes', emoji: '🔺', world: 'shape', route: 'FindShape', blurb: 'Spot them all', kind: 'learn' },
-  { id: 'shape_builder', title: 'Shape Builder', emoji: '🧱', world: 'shape', route: 'ShapeBuilder', blurb: 'Build with shapes', kind: 'learn' },
+  { id: 'shape_builder', title: 'Shape Builder', emoji: '🏠', world: 'shape', route: 'ShapeBuilder', blurb: 'Finish the picture', kind: 'learn' },
   { id: 'match_shape', title: 'Shape Match', emoji: '🧩', world: 'shape', route: 'MatchShape', blurb: 'Match to objects', kind: 'quiz' },
   { id: 'shape_puzzle', title: 'Shape Puzzle', emoji: '🏠', world: 'shape', route: 'ShapePuzzle', blurb: 'Finish the picture', kind: 'quiz' },
   // Thinking
@@ -53,8 +53,8 @@ export const GAMES: GameDef[] = [
   { id: 'odd_one', title: 'Odd One Out', emoji: '🔍', world: 'thinking', route: 'OddOneOut', blurb: 'Find the different', kind: 'quiz' },
   { id: 'sort_category', title: 'Sort It', emoji: '📦', world: 'thinking', route: 'SortCategory', blurb: 'Put things away', kind: 'quiz' },
   // Creative + story — learning play
-  { id: 'coloring', title: 'Coloring', emoji: '🐘', world: 'creative', route: 'Coloring', blurb: 'Fill with color', kind: 'learn' },
-  { id: 'my_world', title: 'My World', emoji: '🌍', world: 'creative', route: 'MyWorldCreator', blurb: 'Build a scene', kind: 'learn' },
+  { id: 'coloring', title: 'Coloring', emoji: '🎨', world: 'creative', route: 'Coloring', blurb: 'Paint fun pictures', kind: 'learn' },
+  { id: 'my_world', title: 'My World', emoji: '🌍', world: 'creative', route: 'MyWorldCreator', blurb: 'Stamp a scene', kind: 'learn' },
   { id: 'story_bunny', title: 'Bunny Story', emoji: '🐰', world: 'story', route: 'StoryPlay', blurb: 'Choose & learn', kind: 'learn' },
 ];
 

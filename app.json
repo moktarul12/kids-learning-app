@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "KIDS Play Learn Create",
-    "slug": "kids-learning-app",
+    "name": "Kiddo",
+    "slug": "kiddoo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,21 +9,20 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#5EC8F2"
+      "backgroundColor": "#2E7DE0"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kids.playlearncreate"
+      "bundleIdentifier": "com.dromominds.kiddoo"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#5EC8F2",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#2E7DE0",
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundImage": "./assets/android-icon-background.png"
       },
-      "package": "com.kids.playlearncreate",
-      "versionCode": 3,
+      "package": "com.dromominds.kiddoo",
+      "versionCode": 4,
       "predictiveBackGestureEnabled": false
     },
     "web": {
