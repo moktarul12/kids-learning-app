@@ -20,7 +20,7 @@ export const FIND_COLOR_ACTIVITIES: FindColorActivity[] = [
   {
     id: 'find_red',
     title: 'Find Red',
-    prompt: '🔎 Find Red',
+    prompt: 'Tap the red ones',
     targetColor: 'red',
     targetHex: '#FF5252',
     options: [
@@ -39,7 +39,7 @@ export const FIND_COLOR_ACTIVITIES: FindColorActivity[] = [
   {
     id: 'find_blue',
     title: 'Find Blue',
-    prompt: '🔎 Find Blue',
+    prompt: 'Tap the blue ones',
     targetColor: 'blue',
     targetHex: '#4DA3FF',
     options: [
@@ -57,7 +57,7 @@ export const FIND_COLOR_ACTIVITIES: FindColorActivity[] = [
   {
     id: 'find_yellow',
     title: 'Find Yellow',
-    prompt: '🔎 Find Yellow',
+    prompt: 'Tap the yellow ones',
     targetColor: 'yellow',
     targetHex: '#FFD93D',
     options: [

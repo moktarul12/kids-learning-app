@@ -10,6 +10,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { ProgressProvider } from './src/state/ProgressContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { colors } from './src/theme/colors';
+import { initSound, unloadSound } from './src/services/sound';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -27,6 +28,14 @@ export default function App() {
   useEffect(() => {
     if (fontsLoaded) setAppReady(true);
   }, [fontsLoaded]);
+
+  useEffect(() => {
+    if (!appReady) return;
+    initSound().catch(() => {});
+    return () => {
+      unloadSound().catch(() => {});
+    };
+  }, [appReady]);
 
   const onLayout = useCallback(() => {
     if (appReady) SplashScreen.hideAsync().catch(() => {});

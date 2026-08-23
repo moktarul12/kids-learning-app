@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import * as Speech from 'expo-speech';
+import { duckMusic } from './sound';
 
 let voiceEnabled = true;
 
@@ -18,18 +19,27 @@ export function stopVoice() {
 
 /**
  * Device TTS helper.
- * For kid-perfect voice later: replace with pre-recorded MP3 / cloud neural TTS.
  * Keep lines SHORT (3–6 words) so robotic TTS stays clear.
  */
 export function speak(text: string, opts?: { rate?: number; pitch?: number }) {
   if (!voiceEnabled || !text.trim()) return;
-  const clean = text.replace(/[⭐✨🎉🌟💛🎈🦊🌈▶←→]/g, '').trim();
+  const clean = text.replace(/[⭐✨🎉🌟💛🎈🦊🌈▶←→👏]/g, '').trim();
   if (!clean) return;
   Speech.stop();
+  duckMusic(true).catch(() => {});
   Speech.speak(clean, {
     language: 'en-US',
     rate: opts?.rate ?? (Platform.OS === 'ios' ? 0.95 : Platform.OS === 'web' ? 0.9 : 0.85),
     pitch: opts?.pitch ?? 1.2,
+    onDone: () => {
+      duckMusic(false).catch(() => {});
+    },
+    onStopped: () => {
+      duckMusic(false).catch(() => {});
+    },
+    onError: () => {
+      duckMusic(false).catch(() => {});
+    },
   });
 }
 
@@ -40,4 +50,5 @@ export const VOICE = {
   yay: () => speak('Yay!'),
   next: () => speak('Next one!'),
   welcome: () => speak("Let's play!"),
+  congrats: () => speak('Congratulations!'),
 };

@@ -415,81 +415,146 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
     gameId: 'missing_number',
     skill: 'numbers',
-    prompt: 'What is missing?',
   });
 
-  /** 0 = before (start), 1 = middle, 2 = after (end) — and sometimes both ends */
   const puzzle = useMemo(() => {
     const threeOpts = (answer: number) => {
-      const pool = [answer - 1, answer + 1, answer + 2, answer - 2, answer + 3]
-        .filter((x) => x >= 1 && x <= 12 && x !== answer);
+      const pool = [answer - 1, answer + 1, answer + 2, answer - 2, answer + 3].filter(
+        (x) => x >= 1 && x <= 12 && x !== answer,
+      );
       return shuffle([answer, pool[0], pool[1]]);
     };
 
     const kindRoll = Math.random();
-    // ~20% both ends missing: ? → mid → ?
-    if (kindRoll < 0.2) {
+    // ~30% both ends: fill BEFORE then AFTER
+    if (kindRoll < 0.3) {
       const mid = randInt(3, 8);
-      const answer = Math.random() > 0.5 ? mid - 1 : mid + 1;
-      const ask: 'before' | 'after' = answer === mid - 1 ? 'before' : 'after';
       return {
         type: 'both' as const,
+        mid,
+        before: mid - 1,
+        after: mid + 1,
         seq: [null, mid, null] as (number | null)[],
-        answer,
-        ask,
-        options: threeOpts(answer),
-        prompt: ask === 'before' ? `What comes before ${mid}?` : `What comes after ${mid}?`,
       };
     }
-    const gap = kindRoll < 0.45 ? 0 : kindRoll < 0.75 ? 1 : 2;
+
+    const gap = kindRoll < 0.55 ? 0 : kindRoll < 0.8 ? 1 : 2;
     const start = randInt(1, 7);
-    const seq = [start, start + 1, start + 2];
-    const answer = seq[gap];
-    const shown = seq.map((v, i) => (i === gap ? null : v));
-    const prompt =
-      gap === 0 ? 'What comes before?' : gap === 2 ? 'What comes after?' : 'What is missing?';
+    const full = [start, start + 1, start + 2];
+    const answer = full[gap];
     return {
       type: 'single' as const,
-      seq: shown as (number | null)[],
+      seq: full.map((v, i) => (i === gap ? null : v)) as (number | null)[],
       answer,
-      ask: gap === 0 ? ('before' as const) : gap === 2 ? ('after' as const) : ('middle' as const),
+      ask: (gap === 0 ? 'before' : gap === 2 ? 'after' : 'middle') as 'before' | 'after' | 'middle',
       options: threeOpts(answer),
-      prompt,
+      prompt: gap === 0 ? 'What comes before?' : gap === 2 ? 'What comes after?' : 'What is missing?',
     };
   }, [round]);
 
+  const [phase, setPhase] = useState<'before' | 'after'>('before');
+  const [filledBefore, setFilledBefore] = useState<number | null>(null);
+  const [filledAfter, setFilledAfter] = useState<number | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
   const [wrong, setWrong] = useState<number | null>(null);
-  const locked = picked === puzzle.answer;
+
+  const bothDone =
+    puzzle.type === 'both' && filledBefore != null && filledAfter != null;
+  const singleLocked = puzzle.type === 'single' && picked === puzzle.answer;
+
+  const bothTarget =
+    puzzle.type === 'both' ? (phase === 'before' ? puzzle.before : puzzle.after) : null;
+
+  const options = useMemo(() => {
+    if (puzzle.type === 'both' && bothTarget != null) {
+      const pool = [bothTarget - 1, bothTarget + 1, bothTarget + 2, bothTarget - 2]
+        .filter((x) => x >= 1 && x <= 12 && x !== bothTarget);
+      return shuffle([bothTarget, pool[0], pool[1]]);
+    }
+    if (puzzle.type === 'single') return puzzle.options;
+    return [];
+  }, [puzzle, bothTarget, phase, round]);
+
+  const prompt =
+    puzzle.type === 'both'
+      ? phase === 'before'
+        ? `What comes before ${puzzle.mid}?`
+        : `What comes after ${puzzle.mid}?`
+      : puzzle.prompt;
 
   useEffect(() => {
+    setPhase('before');
+    setFilledBefore(null);
+    setFilledAfter(null);
     setPicked(null);
     setWrong(null);
-    speak(puzzle.prompt);
-  }, [round, puzzle.prompt]);
+    speak(
+      puzzle.type === 'both'
+        ? `Fill both sides. What comes before ${puzzle.mid}?`
+        : puzzle.prompt,
+    );
+  }, [round]);
 
-  const displayAt = (i: number) => {
+  useEffect(() => {
+    if (puzzle.type !== 'both') return;
+    if (phase === 'after' && filledBefore != null && filledAfter == null) {
+      speak(`Now what comes after ${puzzle.mid}?`);
+    }
+  }, [phase, puzzle, filledBefore, filledAfter]);
+
+  const displayAt = (i: number): string | null => {
+    if (puzzle.type === 'both') {
+      if (i === 1) return String(puzzle.mid);
+      if (i === 0) return filledBefore != null ? String(filledBefore) : null;
+      if (i === 2) return filledAfter != null ? String(filledAfter) : null;
+    }
     const v = puzzle.seq[i];
     if (v != null) return String(v);
-    // For "both" mode, only fill the slot that matches the asked side when locked
-    if (puzzle.type === 'both' && locked) {
-      if (puzzle.ask === 'before' && i === 0) return String(puzzle.answer);
-      if (puzzle.ask === 'after' && i === 2) return String(puzzle.answer);
-    }
-    if (puzzle.type === 'single' && locked && v == null) return String(puzzle.answer);
+    if (singleLocked) return String(puzzle.answer);
     return null;
   };
 
-  const isMystery = (i: number) => displayAt(i) == null;
-  const isJustFilled = (i: number) => locked && puzzle.seq[i] == null && displayAt(i) != null;
+  const onPick = (o: number) => {
+    if (showReward) return;
+    if (puzzle.type === 'both') {
+      if (bothDone) return;
+      const need = phase === 'before' ? puzzle.before : puzzle.after;
+      if (o === need) {
+        speak(String(o));
+        if (phase === 'before') {
+          setFilledBefore(o);
+          setPhase('after');
+        } else {
+          setFilledAfter(o);
+          setTimeout(() => celebrate(), 500);
+        }
+      } else {
+        setWrong(o);
+        setTimeout(() => setWrong(null), 450);
+        almost(phase === 'before' ? 'Try the number before!' : 'Try the number after!');
+      }
+      return;
+    }
+
+    if (singleLocked) return;
+    if (o === puzzle.answer) {
+      setPicked(o);
+      speak(String(o));
+      setTimeout(() => celebrate(), 500);
+    } else {
+      setWrong(o);
+      setTimeout(() => setWrong(null), 450);
+      almost();
+    }
+  };
 
   const hero =
-    puzzle.ask === 'before' ? '🦊' : puzzle.ask === 'after' ? '🐰' : puzzle.type === 'both' ? '🌟' : '🦉';
+    puzzle.type === 'both' ? '🌟' : puzzle.ask === 'before' ? '🦊' : puzzle.ask === 'after' ? '🐰' : '🦉';
   const title =
     puzzle.type === 'both'
-      ? puzzle.ask === 'before'
-        ? 'Fill the before!'
-        : 'Fill the after!'
+      ? phase === 'before'
+        ? 'Fill before & after'
+        : 'Now the after!'
       : puzzle.ask === 'before'
         ? 'What comes before?'
         : puzzle.ask === 'after'
@@ -499,7 +564,7 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
   return (
     <GameShell
       title="Missing Number"
-      prompt={puzzle.prompt}
+      prompt={prompt}
       promptEmoji="❓"
       round={round}
       onBack={() => navigation.goBack()}
@@ -509,12 +574,13 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
       onNext={playNext}
       streak={streak}
       hint={hint}
+      rewardMessage="Nice!"
     >
       <View
         style={[
           styles.missingStage,
-          puzzle.ask === 'before' && styles.missingStageBefore,
-          puzzle.ask === 'after' && styles.missingStageAfter,
+          puzzle.type === 'single' && puzzle.ask === 'before' && styles.missingStageBefore,
+          puzzle.type === 'single' && puzzle.ask === 'after' && styles.missingStageAfter,
           puzzle.type === 'both' && styles.missingStageBoth,
         ]}
       >
@@ -525,10 +591,10 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
           <View style={styles.missingBannerCopy}>
             <Text style={styles.missingBannerTitle}>{title}</Text>
             <Text style={styles.missingBannerSub}>
-              {locked
+              {bothDone || singleLocked
                 ? 'Sequence complete!'
                 : puzzle.type === 'both'
-                  ? 'Both ends are open — pick carefully'
+                  ? `Step ${phase === 'before' ? '1' : '2'} of 2 — tap the ${phase} number`
                   : 'Which number belongs here?'}
             </Text>
           </View>
@@ -538,10 +604,16 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
           <View style={styles.missingPathLine} />
           <View style={styles.missingTrack}>
             {[0, 1, 2].map((i) => {
-              const mystery = isMystery(i);
-              const filled = isJustFilled(i);
-              const label =
-                i === 0 ? 'before' : i === 2 ? 'after' : puzzle.type === 'both' ? 'here' : 'middle';
+              const val = displayAt(i);
+              const mystery = val == null;
+              const activeBoth =
+                puzzle.type === 'both' &&
+                ((phase === 'before' && i === 0 && filledBefore == null) ||
+                  (phase === 'after' && i === 2 && filledAfter == null));
+              const filled =
+                (puzzle.type === 'both' && ((i === 0 && filledBefore != null) || (i === 2 && filledAfter != null))) ||
+                (puzzle.type === 'single' && singleLocked && puzzle.seq[i] == null);
+              const label = i === 0 ? 'before' : i === 2 ? 'after' : 'middle';
               return (
                 <React.Fragment key={`slot-${i}`}>
                   {i > 0 ? <Text style={styles.missingArrow}>→</Text> : null}
@@ -550,6 +622,7 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
                       styles.missingNode,
                       !mystery && !filled && styles.missingNodeKnown,
                       mystery && styles.missingNodeMystery,
+                      activeBoth && styles.missingNodeActive,
                       filled && styles.missingNodeWin,
                     ]}
                   >
@@ -558,11 +631,9 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
                         <Text style={styles.missingMystery}>❓</Text>
                       </LivingIcon>
                     ) : (
-                      <Text style={[styles.missingNum, filled && styles.missingNumWin]}>
-                        {displayAt(i)}
-                      </Text>
+                      <Text style={[styles.missingNum, filled && styles.missingNumWin]}>{val}</Text>
                     )}
-                    <Text style={styles.missingTag}>{filled ? 'found!' : label}</Text>
+                    <Text style={styles.missingTag}>{filled ? 'done!' : label}</Text>
                   </View>
                 </React.Fragment>
               );
@@ -573,41 +644,34 @@ export function MissingNumberScreen({ navigation }: RootStackProps<'MissingNumbe
         <View style={styles.missingPickLabel}>
           <Text style={styles.missingPickEmoji}>👇</Text>
           <Text style={styles.missingHint}>
-            {locked
+            {bothDone || singleLocked
               ? 'Perfect!'
               : puzzle.type === 'both'
-                ? puzzle.ask === 'before'
-                  ? `Tap the number before ${puzzle.seq[1]}`
-                  : `Tap the number after ${puzzle.seq[1]}`
+                ? `Tap the number that comes ${phase} ${puzzle.mid}`
                 : 'Tap the missing number'}
           </Text>
         </View>
 
         <View style={styles.missingRow}>
-          {puzzle.options.map((o) => {
-            const isRight = locked && o === puzzle.answer;
+          {options.map((o) => {
+            const isRight =
+              (puzzle.type === 'single' && singleLocked && o === puzzle.answer) ||
+              (puzzle.type === 'both' &&
+                ((filledBefore === o && phase !== 'before') ||
+                  (filledAfter === o && bothDone) ||
+                  (phase === 'before' && filledBefore === o) ||
+                  (phase === 'after' && filledAfter === o)));
             const isWrong = wrong === o;
             return (
               <Pressable
-                key={`${round}-${o}`}
-                disabled={locked}
-                onPress={() => {
-                  if (locked) return;
-                  if (o === puzzle.answer) {
-                    setPicked(o);
-                    speak(String(o));
-                    setTimeout(() => celebrate(), 600);
-                  } else {
-                    setWrong(o);
-                    setTimeout(() => setWrong(null), 450);
-                    almost();
-                  }
-                }}
+                key={`${round}-${phase}-${o}`}
+                disabled={bothDone || singleLocked}
+                onPress={() => onPick(o)}
                 style={({ pressed }) => [
                   styles.missingOpt,
                   isRight && styles.missingOptRight,
                   isWrong && styles.missingOptWrong,
-                  { transform: [{ scale: pressed && !locked ? 0.94 : 1 }] },
+                  { transform: [{ scale: pressed && !(bothDone || singleLocked) ? 0.94 : 1 }] },
                 ]}
               >
                 <Text
@@ -1149,6 +1213,12 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     width: 88,
     height: 110,
+  },
+  missingNodeActive: {
+    borderColor: colors.orange,
+    borderWidth: 4,
+    backgroundColor: '#FFF3D6',
+    transform: [{ scale: 1.05 }],
   },
   missingNodeWin: {
     backgroundColor: colors.lime,

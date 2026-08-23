@@ -246,7 +246,7 @@ export function ActivityCard({
     >
       <View style={[styles.activityBubble, { backgroundColor: tint + '22' }]}>
         <LivingIcon motion="pulse">
-          <Text style={{ fontSize: 46 }}>{emoji}</Text>
+          <Text style={{ fontSize: 56 }}>{emoji}</Text>
         </LivingIcon>
         {done ? (
           <View style={styles.doneBadge}>

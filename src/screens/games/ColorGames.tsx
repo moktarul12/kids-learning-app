@@ -68,7 +68,7 @@ function ActivityFrame({
         </ContentStage>
       </View>
       {hint ? <FeedbackToast text={hint} /> : null}
-      <RewardModal visible={showReward} onNext={onNext} streak={streak} message="Great Job!" />
+      <RewardModal visible={showReward} onNext={onNext} streak={streak} message="Yay!" />
     </AppShell>
   );
 }
@@ -156,7 +156,7 @@ export function FindColorScreen({ navigation }: RootStackProps<'FindColor'>) {
     gameId: 'find_color',
     skill: 'colors',
     dailyTaskId: 'find_red',
-    prompt: 'Find the color',
+    // Do not speak generic "Find the color" — screen speaks the target once
   });
 
   const activity: FindColorActivity = useMemo(
@@ -182,8 +182,9 @@ export function FindColorScreen({ navigation }: RootStackProps<'FindColor'>) {
     setFound([]);
     setWrongId(null);
     setFlashYes(false);
-    speak(activity.title);
-  }, [round, activity.title]);
+    // One clear line — avoid "Find Find …"
+    speak(`Tap the ${activity.targetColor} ones`);
+  }, [round, activity.targetColor]);
 
   const onPick = (opt: FindColorOption) => {
     if (found.includes(opt.id) || showReward) return;
@@ -213,7 +214,7 @@ export function FindColorScreen({ navigation }: RootStackProps<'FindColor'>) {
       round={round}
       prompt={activity.prompt}
       onBack={() => navigation.goBack()}
-      onSpeak={() => speak(activity.title)}
+      onSpeak={() => speak(`Tap the ${activity.targetColor} ones`)}
       progressCurrent={found.length}
       progressTotal={need}
       showReward={showReward}

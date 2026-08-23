@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import { BadgeId, SkillId, useProgress } from '../state/ProgressContext';
-import { speak, VOICE, stopVoice } from '../services/voice';
+import { speak, stopVoice } from '../services/voice';
 
 export function useGameSession(opts: {
   gameId: string;
@@ -36,10 +36,8 @@ export function useGameSession(opts: {
   }, [opts.prompt]);
 
   const celebrate = useCallback(
-    (customMsg?: string) => {
+    (_customMsg?: string) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-      VOICE.amazing();
-      if (customMsg) setTimeout(() => speak(customMsg), 900);
       addReward({
         stars: opts.stars ?? 3,
         coins: opts.coins ?? 10,
@@ -56,15 +54,14 @@ export function useGameSession(opts: {
 
   const almost = useCallback((msg = 'Try again!') => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-    VOICE.almost();
+    speak(msg);
     setHint(msg);
     setTimeout(() => setHint(null), 1600);
   }, []);
 
-  /** Next question / round — stay in the game */
+  /** Next question / round — stay in the game (silent — celebration already spoke) */
   const playNext = useCallback(() => {
     setShowReward(false);
-    VOICE.next();
     setRound((r) => r + 1);
   }, []);
 
