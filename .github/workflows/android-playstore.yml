@@ -1,4 +1,4 @@
-name: Build Signed AAB (Play Store)
+name: Build Signed AAB for Play Store
 
 on:
   workflow_dispatch:
