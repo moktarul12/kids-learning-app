@@ -1,0 +1,112 @@
+name: Build Signed AAB (Play Store)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: android-aab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-aab:
+    name: Expo → Signed AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Prebuild native Android project
+        run: npx expo prebuild --platform android --non-interactive --clean
+
+      - name: Decode keystore
+        run: echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+
+      - name: Configure release signing
+        working-directory: android/app
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          gradle = Path("build.gradle")
+          text = gradle.read_text()
+
+          signing_block = """
+    signingConfigs {
+        release {
+            storeFile file("release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+"""
+
+          if "signingConfigs" not in text:
+              text = text.replace(
+                  "android {",
+                  "android {" + signing_block,
+                  1,
+              )
+
+          text = re.sub(
+              r"(buildTypes\s*\{\s*release\s*\{)",
+              r"\1\n            signingConfig signingConfigs.release",
+              text,
+              count=1,
+          )
+
+          gradle.write_text(text)
+          print("Configured release signing in build.gradle")
+          PY
+
+      - name: Build signed AAB
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew bundleRelease --no-daemon
+
+      - name: Locate AAB
+        id: aab
+        run: |
+          AAB=$(find android/app/build/outputs/bundle -name "*.aab" | head -n 1)
+          if [ -z "$AAB" ]; then
+            echo "No AAB found"
+            find android/app/build/outputs -type f || true
+            exit 1
+          fi
+          cp "$AAB" kiddo-release.aab
+          echo "path=kiddo-release.aab" >> "$GITHUB_OUTPUT"
+          ls -lh kiddo-release.aab
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiddo-playstore-aab
+          path: kiddo-release.aab
+          if-no-files-found: error
+          retention-days: 90
