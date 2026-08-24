@@ -1,6 +1,10 @@
 name: Build Signed AAB for Play Store
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/android-playstore.yml'
   workflow_dispatch:
 
 concurrency:
