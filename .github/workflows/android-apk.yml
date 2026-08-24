@@ -1,112 +1,19 @@
-name: Build Android APK
+name: Build Signed Android
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
-    inputs:
-      build_playstore_aab:
-        description: 'Also build signed AAB for Google Play'
-        required: false
-        default: 'true'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
 
 concurrency:
-  group: android-apk-${{ github.ref }}
+  group: android-signed-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-apk:
-    name: Expo Android APK
+  build-signed:
+    name: Signed APK + AAB
     runs-on: ubuntu-latest
     timeout-minutes: 90
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install JS dependencies
-        run: npm ci
-
-      - name: Prebuild native Android project
-        run: npx expo prebuild --platform android --non-interactive --clean
-
-      - name: Use debug keystore for CI release APK
-        working-directory: android/app
-        run: |
-          python3 <<'PY'
-          from pathlib import Path
-          path = Path("build.gradle")
-          text = path.read_text()
-          if "signingConfig signingConfigs.debug" not in text:
-              import re
-              text2, n = re.subn(
-                  r"(release\s*\{)",
-                  r"\1\n            signingConfig signingConfigs.debug",
-                  text,
-                  count=1,
-              )
-              if n:
-                  path.write_text(text2)
-                  print("Patched release signingConfig -> debug")
-              else:
-                  print("WARNING: could not patch release signing")
-          else:
-              print("Release already uses debug signingConfig")
-          PY
-
-      - name: Build release APK
-        working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
-
-      - name: Locate APK
-        run: |
-          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
-          if [ -z "$APK" ]; then
-            echo "No APK found"
-            find android/app/build/outputs -type f || true
-            exit 1
-          fi
-          cp "$APK" kids-learning-app.apk
-          ls -lh kids-learning-app.apk
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kids-learning-app-apk
-          path: kids-learning-app.apk
-          if-no-files-found: error
-          retention-days: 30
-
-  build-playstore-aab:
-    name: Signed AAB for Play Store
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    if: >
-      github.event_name == 'push' ||
-      (github.event_name == 'workflow_dispatch' && inputs.build_playstore_aab == 'true')
 
     steps:
       - name: Checkout
@@ -142,7 +49,7 @@ jobs:
           echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
           ls -lh android/app/release.keystore
 
-      - name: Configure Play Store release signing
+      - name: Configure release signing
         working-directory: android/app
         run: |
           python3 <<'PY'
@@ -161,31 +68,36 @@ jobs:
         }
 """
 
-          if "storeFile file(\"release.keystore\")" not in text:
+          if 'storeFile file("release.keystore")' not in text:
               text = text.replace(
                   "signingConfigs {\n        debug {",
                   "signingConfigs {\n" + release_cfg + "        debug {",
                   1,
               )
 
-          text = text.replace(
-              "signingConfig signingConfigs.debug",
-              "signingConfig signingConfigs.release",
-          )
-          # keep debug buildType on debug keystore
+          # Point release buildType at release keystore
           text = re.sub(
-              r"(buildTypes\s*\{\s*debug\s*\{[^}]*signingConfig\s+)signingConfigs\.release",
-              r"\1signingConfigs.debug",
+              r"(buildTypes\s*\{\s*debug\s*\{[\s\S]*?\}\s*release\s*\{[\s\S]*?signingConfig\s+)signingConfigs\.debug",
+              r"\1signingConfigs.release",
               text,
               count=1,
-              flags=re.S,
           )
+          # Fallback if Expo template uses only release signingConfig debug
+          if "signingConfig signingConfigs.release" not in text:
+              text = re.sub(
+                  r"(release\s*\{[\s\S]*?)signingConfig signingConfigs\.debug",
+                  r"\1signingConfig signingConfigs.release",
+                  text,
+                  count=1,
+              )
 
           path.write_text(text)
-          print("Configured Play Store release signing")
+          print("Configured release signing for APK + AAB")
+          if "signingConfigs.release" not in text and "signingConfig signingConfigs.release" not in text:
+              raise SystemExit("Failed to wire signingConfigs.release")
           PY
 
-      - name: Build signed AAB
+      - name: Build signed APK and AAB
         working-directory: android
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -197,23 +109,34 @@ jobs:
             exit 1
           fi
           chmod +x gradlew
-          ./gradlew bundleRelease --no-daemon
+          ./gradlew assembleRelease bundleRelease --no-daemon
 
-      - name: Locate AAB
+      - name: Collect artifacts
         run: |
+          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
           AAB=$(find android/app/build/outputs/bundle -name "*.aab" | head -n 1)
-          if [ -z "$AAB" ]; then
-            echo "No AAB found"
+          if [ -z "$APK" ] || [ -z "$AAB" ]; then
+            echo "Missing APK or AAB"
             find android/app/build/outputs -type f || true
             exit 1
           fi
-          cp "$AAB" kiddo-release.aab
-          ls -lh kiddo-release.aab
+          mkdir -p dist
+          cp "$APK" dist/kiddo-release.apk
+          cp "$AAB" dist/kiddo-release.aab
+          ls -lh dist/
 
-      - name: Upload Play Store AAB
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: kiddo-playstore-aab
-          path: kiddo-release.aab
+          name: kiddo-signed-apk
+          path: dist/kiddo-release.apk
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload signed AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiddo-signed-aab
+          path: dist/kiddo-release.aab
           if-no-files-found: error
           retention-days: 90
