@@ -4,6 +4,7 @@ import {
   Image,
   ImageSourcePropType,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -432,11 +433,25 @@ export function ProgressIndicator({
 export function ContentStage({
   children,
   style,
+  contentStyle,
 }: {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
 }) {
-  return <View style={[styles.stage, shadows.card, style]}>{children}</View>;
+  return (
+    <View style={[styles.stage, shadows.card, style]}>
+      <ScrollView
+        style={styles.stageScroll}
+        contentContainerStyle={[styles.stageScrollContent, contentStyle]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        bounces
+      >
+        {children}
+      </ScrollView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -817,5 +832,12 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     width: '100%',
     flex: 1,
+    overflow: 'hidden',
+  },
+  stageScroll: { flex: 1, width: '100%' },
+  stageScrollContent: {
+    flexGrow: 1,
+    width: '100%',
+    paddingBottom: 12,
   },
 });

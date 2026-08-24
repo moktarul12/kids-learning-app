@@ -73,7 +73,7 @@ export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>
           }}
         />
         <View style={styles.builderBody}>
-          <ContentStage>
+          <ContentStage contentStyle={styles.builderScroll}>
             <CreateBuilderList navigation={navigation} />
           </ContentStage>
         </View>
@@ -94,7 +94,7 @@ export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>
           }}
         />
         <View style={styles.builderBody}>
-          <ContentStage>
+          <ContentStage contentStyle={styles.builderScroll}>
             <GoodHabitList
               onPick={(habitId) => navigation.navigate('StoryPlay', { habitId })}
             />
@@ -120,6 +120,7 @@ export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>
       />
 
       <ScrollView
+        style={styles.scrollHost}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scroll, { paddingHorizontal: padH }]}
       >
@@ -201,7 +202,9 @@ function Zone({
 
 const styles = StyleSheet.create({
   builderBody: { flex: 1, paddingHorizontal: 14, paddingBottom: 8 },
-  scroll: { paddingBottom: 36, gap: 14 },
+  scrollHost: { flex: 1 },
+  scroll: { paddingBottom: 36, gap: 14, flexGrow: 1 },
+  builderScroll: { paddingBottom: 24, flexGrow: 1 },
   zone: {
     borderRadius: 28,
     paddingTop: 14,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
+import { ScrollView, StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 import { GameHeader } from './GameHeader';
 import { SoftParkBackground } from './SoftParkBackground';
 import { WhiteStage, PromptBanner } from './SkyBackground';
@@ -70,7 +70,15 @@ export function GameShell({
         <View style={styles.body}>
           <WhiteStage>
             {!hidePrompt && <PromptBanner text={prompt} emoji={promptEmoji} />}
-            <View style={styles.content}>{children}</View>
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={styles.content}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces
+            >
+              {children}
+            </ScrollView>
             <ProgressBar current={current} total={progressTotal} />
           </WhiteStage>
         </View>
@@ -84,13 +92,14 @@ export function GameShell({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#C8EAF8' },
   body: { flex: 1, paddingHorizontal: 14, paddingTop: 4, paddingBottom: 16 },
+  scroll: { flex: 1, width: '100%' },
   content: {
-    flex: 1,
+    flexGrow: 1,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: 10,
-    overflow: 'hidden',
     paddingTop: 4,
+    paddingBottom: 12,
   },
 });

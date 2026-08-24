@@ -4,7 +4,6 @@ import {
   Linking,
   Modal,
   Pressable,
-  ScrollView,
   Share,
   StyleSheet,
   Text,
@@ -121,8 +120,7 @@ export function MeScreen({ navigation }: Props) {
     <AppShell background={BACKGROUNDS.myWorld}>
       <AppHeader title="ME" left="avatar" right="none" />
       <View style={styles.body}>
-        <ContentStage>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.inner}>
+        <ContentStage contentStyle={styles.inner}>
             <View style={styles.mascot}>
               <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" />
               <Text style={styles.appName}>Kiddo</Text>
@@ -233,7 +231,6 @@ export function MeScreen({ navigation }: Props) {
             >
               <Text style={styles.sayHiText}>🔊 Say hi to me</Text>
             </Pressable>
-          </ScrollView>
         </ContentStage>
       </View>
 

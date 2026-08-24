@@ -531,33 +531,39 @@ export function DailyAdventureScreen({ navigation }: RootStackProps<'DailyAdvent
     <WorldScene mood="soft">
       <GameHeader title="Daily Adventure" onBack={() => navigation.goBack()} prompt="Daily adventure" backLabel="Me" />
       <View style={styles.page}>
-        <WhiteStage>
-          <Text style={styles.heading}>Today&apos;s missions</Text>
-          {dailyTasks.map((t) => (
-            <Pressable
-              key={t.id}
-              style={[styles.mission, t.done && styles.missionDone]}
-              onPress={() => {
-                if (t.done || !t.route) return;
-                navigation.navigate(t.route as never);
-              }}
-            >
-              <Text style={styles.missionText}>
-                {t.done ? '✅' : '○'}  {t.label}
-              </Text>
-            </Pressable>
-          ))}
-          {allDone && (
-            <BigButton
-              label="Open Mystery Reward"
-              onPress={() => {
-                addReward({ gems: 1, coins: 25, stars: 5 });
-                navigation.navigate('MysteryBox');
-              }}
-              color={colors.orange}
-              textColor="#FFF"
-            />
-          )}
+        <WhiteStage style={styles.dailyStage}>
+          <ScrollView
+            style={styles.dailyScroll}
+            contentContainerStyle={styles.dailyScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.heading}>Today&apos;s missions</Text>
+            {dailyTasks.map((t) => (
+              <Pressable
+                key={t.id}
+                style={[styles.mission, t.done && styles.missionDone]}
+                onPress={() => {
+                  if (t.done || !t.route) return;
+                  navigation.navigate(t.route as never);
+                }}
+              >
+                <Text style={styles.missionText}>
+                  {t.done ? '✅' : '○'}  {t.label}
+                </Text>
+              </Pressable>
+            ))}
+            {allDone && (
+              <BigButton
+                label="Open Mystery Reward"
+                onPress={() => {
+                  addReward({ gems: 1, coins: 25, stars: 5 });
+                  navigation.navigate('MysteryBox');
+                }}
+                color={colors.orange}
+                textColor="#FFF"
+              />
+            )}
+          </ScrollView>
         </WhiteStage>
       </View>
     </WorldScene>
@@ -727,6 +733,9 @@ const styles = StyleSheet.create({
   storyChoiceEmoji: { fontSize: 32 },
   storyChoiceLabel: { fontFamily: 'Fredoka_700Bold', fontSize: 17, color: colors.ink, flex: 1 },
   page: { flex: 1, padding: 12 },
+  dailyStage: { padding: 12 },
+  dailyScroll: { flex: 1, width: '100%' },
+  dailyScrollContent: { flexGrow: 1, paddingBottom: 16, gap: 4 },
   heading: { ...typography.title, fontSize: 22, textAlign: 'center', marginBottom: 8 },
   mission: {
     width: '100%',

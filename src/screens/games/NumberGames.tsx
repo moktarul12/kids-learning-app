@@ -2,156 +2,11 @@ import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { RootStackProps } from '../../navigation/types';
 import { GameShell } from '../../components/GameShell';
-import { BigButton } from '../../components/BigButton';
 import { LivingIcon } from '../../components/KidAnimations';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { useGameSession, randInt, shuffle } from '../../hooks/useGameSession';
-import { speak, greetKid } from '../../services/voice';
-
-export function NumberIntroScreen({ navigation }: RootStackProps<'NumberIntro'>) {
-  const [n, setN] = useState(1);
-  const { showReward, celebrate, playNext, streak, round } = useGameSession({
-    gameId: 'number_intro',
-    skill: 'numbers',
-  });
-
-  useEffect(() => {
-    setN(1);
-  }, [round]);
-
-  useEffect(() => {
-    if (n === 1) {
-      greetKid('numbers');
-      const t = setTimeout(() => speak(`Number ${n}`), 900);
-      return () => clearTimeout(t);
-    }
-    speak(`Number ${n}`);
-  }, [n, round]);
-
-  const tens = Math.floor(n / 10);
-  const ones = n % 10;
-  const decadeStart = Math.floor((n - 1) / 10) * 10 + 1;
-  const decadeEnd = Math.min(decadeStart + 9, 100);
-
-  const go = (next: number) => {
-    const clamped = Math.max(1, Math.min(100, next));
-    if (clamped === 100 && n === 100) {
-      celebrate();
-      return;
-    }
-    setN(clamped);
-    if (clamped === 100) {
-      setTimeout(() => celebrate(), 600);
-    }
-  };
-
-  return (
-    <GameShell
-      title="Meet Numbers"
-      prompt={`Number ${n}`}
-      promptEmoji="🔢"
-      round={round}
-      progressCurrent={n}
-      progressTotal={100}
-      onBack={() => navigation.goBack()}
-      backLabel="Number World"
-      backEmoji="🔢"
-      showReward={showReward}
-      onNext={playNext}
-      streak={streak}
-      rewardMessage="You met 100!"
-    >
-      <Text style={styles.meetDecade}>
-        Exploring {decadeStart}–{decadeEnd}
-      </Text>
-
-      <Pressable onPress={() => speak(`Number ${n}`)} style={styles.meetHero}>
-        <LivingIcon motion="pulse">
-          <Text style={[styles.mega, n >= 100 && { fontSize: 72 }]}>{n}</Text>
-        </LivingIcon>
-      </Pressable>
-
-      {/* Visual: dots for small, tens groups for larger */}
-      {n <= 20 ? (
-        <View style={styles.meetDots}>
-          {Array.from({ length: n }).map((_, i) => (
-            <Text key={i} style={styles.meetDot}>
-              {['⭐', '🔵', '🟡', '🟢'][i % 4]}
-            </Text>
-          ))}
-        </View>
-      ) : (
-        <View style={styles.meetTensBox}>
-          <Text style={styles.meetTensLabel}>
-            {tens > 0 ? `${tens} ten${tens > 1 ? 's' : ''}` : ''}
-            {tens > 0 && ones > 0 ? ' + ' : ''}
-            {ones > 0 ? `${ones}` : tens === 0 ? '0' : ''}
-          </Text>
-          <View style={styles.meetTensRow}>
-            {Array.from({ length: tens }).map((_, i) => (
-              <View key={`t-${i}`} style={styles.meetTenBar}>
-                <Text style={styles.meetTenBarText}>10</Text>
-              </View>
-            ))}
-            {Array.from({ length: ones }).map((_, i) => (
-              <View key={`o-${i}`} style={styles.meetOneDot} />
-            ))}
-          </View>
-        </View>
-      )}
-
-      <View style={styles.meetNav}>
-        <Pressable
-          onPress={() => go(n - 1)}
-          disabled={n <= 1}
-          style={[styles.meetNavBtn, n <= 1 && { opacity: 0.35 }]}
-        >
-          <Text style={styles.meetNavBtnText}>◀</Text>
-        </Pressable>
-        <Pressable onPress={() => go(n - 10)} disabled={n <= 1} style={[styles.meetJump, n <= 1 && { opacity: 0.35 }]}>
-          <Text style={styles.meetJumpText}>-10</Text>
-        </Pressable>
-        <Pressable onPress={() => go(n + 10)} disabled={n >= 100} style={[styles.meetJump, n >= 100 && { opacity: 0.35 }]}>
-          <Text style={styles.meetJumpText}>+10</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => go(n + 1)}
-          disabled={n >= 100}
-          style={[styles.meetNavBtn, styles.meetNavBtnPrimary, n >= 100 && { opacity: 0.35 }]}
-        >
-          <Text style={[styles.meetNavBtnText, { color: '#FFF' }]}>▶</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.meetDecadeStrip}>
-        {[1, 11, 21, 31, 41, 51, 61, 71, 81, 91].map((start) => {
-          const on = n >= start && n < start + 10;
-          return (
-            <Pressable
-              key={start}
-              onPress={() => go(start)}
-              style={[styles.meetDecadeChip, on && styles.meetDecadeChipOn]}
-            >
-              <Text style={[styles.meetDecadeChipText, on && { color: '#FFF' }]}>{start}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {n >= 100 ? (
-        <BigButton label="Finish!" onPress={() => celebrate()} color={colors.yellow} />
-      ) : (
-        <BigButton
-          label={n % 10 === 0 ? `Yay! On to ${n + 1}` : 'Next number'}
-          onPress={() => go(n + 1)}
-          color={colors.blue}
-          textColor="#FFF"
-        />
-      )}
-    </GameShell>
-  );
-}
+import { speak } from '../../services/voice';
 
 export function CountObjectsScreen({ navigation }: RootStackProps<'CountObjects'>) {
   const { showReward, hint, celebrate, almost, playNext, streak, round } = useGameSession({
@@ -384,18 +239,35 @@ export function BeforeAfterScreen({ navigation }: RootStackProps<'BeforeAfter'>)
     gameId: 'before_after',
     skill: 'numbers',
   });
+
+  /** Alternate number rounds and letter rounds (A–D) */
+  const kind = useMemo<'number' | 'letter'>(() => (round % 2 === 0 ? 'number' : 'letter'), [round]);
   const mode = useMemo(() => (Math.random() > 0.5 ? 'before' : 'after'), [round]);
-  const n = useMemo(() => randInt(3, 9), [round]);
-  const answer = mode === 'before' ? n - 1 : n + 1;
-  const options = useMemo(
-    () => shuffle([answer, answer + 1, Math.max(1, answer - 1)]),
-    [answer, round],
-  );
+
+  const puzzle = useMemo(() => {
+    if (kind === 'letter') {
+      const letters = ['A', 'B', 'C', 'D'] as const;
+      const idx = mode === 'before' ? randInt(1, 3) : randInt(0, 2);
+      const anchor = letters[idx];
+      const answer = letters[mode === 'before' ? idx - 1 : idx + 1];
+      const distractors = letters.filter((L) => L !== answer);
+      const options = shuffle([answer, distractors[0], distractors[1]]);
+      return { anchor, answer, options, unit: 'letter' as const };
+    }
+    const n = randInt(3, 9);
+    const answer = mode === 'before' ? n - 1 : n + 1;
+    const options = shuffle([answer, answer + 1, Math.max(1, answer - 1)]);
+    return { anchor: n, answer, options, unit: 'number' as const };
+  }, [kind, mode, round]);
+
   const prompt =
-    mode === 'before' ? `Before ${n}, what number comes?` : `After ${n}, what number comes?`;
-  const [picked, setPicked] = useState<number | null>(null);
-  const [wrong, setWrong] = useState<number | null>(null);
-  const locked = picked === answer;
+    mode === 'before'
+      ? `Before ${puzzle.anchor}, what ${puzzle.unit === 'letter' ? 'letter' : 'number'} comes?`
+      : `After ${puzzle.anchor}, what ${puzzle.unit === 'letter' ? 'letter' : 'number'} comes?`;
+
+  const [picked, setPicked] = useState<string | number | null>(null);
+  const [wrong, setWrong] = useState<string | number | null>(null);
+  const locked = picked === puzzle.answer;
 
   useEffect(() => {
     setPicked(null);
@@ -403,10 +275,12 @@ export function BeforeAfterScreen({ navigation }: RootStackProps<'BeforeAfter'>)
     speak(prompt);
   }, [round, prompt]);
 
-  const left = mode === 'before' ? (locked ? String(answer) : '?') : String(n);
-  const right = mode === 'before' ? String(n) : locked ? String(answer) : '?';
+  const left = mode === 'before' ? (locked ? String(puzzle.answer) : '?') : String(puzzle.anchor);
+  const right = mode === 'before' ? String(puzzle.anchor) : locked ? String(puzzle.answer) : '?';
   const leftMystery = mode === 'before' && !locked;
   const rightMystery = mode === 'after' && !locked;
+  const chooseHint =
+    puzzle.unit === 'letter' ? 'Choose the missing letter' : 'Choose the missing number';
 
   return (
     <GameShell
@@ -425,19 +299,24 @@ export function BeforeAfterScreen({ navigation }: RootStackProps<'BeforeAfter'>)
       <View style={[styles.beforeStage, mode === 'after' && styles.beforeStageAfter]}>
         <View style={styles.beforeBanner}>
           <LivingIcon motion="bob">
-            <Text style={styles.beforeHero}>{mode === 'before' ? '🦊' : '🐰'}</Text>
+            <Text style={styles.beforeHero}>
+              {puzzle.unit === 'letter' ? '🔤' : mode === 'before' ? '🦊' : '🐰'}
+            </Text>
           </LivingIcon>
           <View style={styles.beforeBannerCopy}>
             <Text style={styles.beforeBannerTitle}>
               {mode === 'before' ? 'What comes before?' : 'What comes after?'}
             </Text>
             <Text style={styles.beforeBannerSub}>
-              {locked ? 'You found it!' : 'Tap a number below'}
+              {locked
+                ? 'You found it!'
+                : puzzle.unit === 'letter'
+                  ? 'Tap a letter below'
+                  : 'Tap a number below'}
             </Text>
           </View>
         </View>
 
-        {/* Number path — mystery door + known number */}
         <View style={styles.beforePath}>
           <View style={styles.beforePathLine} />
           <View style={styles.beforeTrack}>
@@ -493,12 +372,12 @@ export function BeforeAfterScreen({ navigation }: RootStackProps<'BeforeAfter'>)
 
         <View style={styles.beforePickLabel}>
           <Text style={styles.beforePickEmoji}>👇</Text>
-          <Text style={styles.beforeHint}>{locked ? 'Amazing!' : 'Choose the missing number'}</Text>
+          <Text style={styles.beforeHint}>{locked ? 'Amazing!' : chooseHint}</Text>
         </View>
 
         <View style={styles.beforeRow}>
-          {options.map((o) => {
-            const isRight = locked && o === answer;
+          {puzzle.options.map((o) => {
+            const isRight = locked && o === puzzle.answer;
             const isWrong = wrong === o;
             return (
               <Pressable
@@ -506,7 +385,7 @@ export function BeforeAfterScreen({ navigation }: RootStackProps<'BeforeAfter'>)
                 disabled={locked}
                 onPress={() => {
                   if (locked) return;
-                  if (o === answer) {
+                  if (o === puzzle.answer) {
                     setPicked(o);
                     speak(String(o));
                     setTimeout(() => celebrate(), 600);

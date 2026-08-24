@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -27,8 +27,7 @@ export function GamesScreen({ navigation }: Props) {
     <AppShell background={BACKGROUNDS.myWorld}>
       <AppHeader title="GAMES" left="avatar" right="none" />
       <View style={styles.body}>
-        <ContentStage>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <ContentStage contentStyle={styles.scroll}>
             {GROUPS.map((group) => (
               <View key={group.world} style={styles.groupBlock}>
                 <Text style={[styles.group, { color: group.color }]}>{group.label}</Text>
@@ -53,7 +52,6 @@ export function GamesScreen({ navigation }: Props) {
                 </View>
               </View>
             ))}
-          </ScrollView>
         </ContentStage>
       </View>
     </AppShell>

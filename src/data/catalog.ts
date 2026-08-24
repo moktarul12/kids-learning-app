@@ -36,11 +36,10 @@ export const GAMES: GameDef[] = [
   { id: 'sort_color', title: 'Color Sort', emoji: '🧺', world: 'color', route: 'SortColor', blurb: 'Fill the baskets', kind: 'quiz' },
   { id: 'match_color', title: 'Color Match', emoji: '🎯', world: 'color', route: 'MatchColor', blurb: 'Pair dots & things', kind: 'quiz' },
   // Number
-  { id: 'number_intro', title: 'Meet Numbers', emoji: '1️⃣', world: 'number', route: 'NumberIntro', blurb: 'Count to 100', kind: 'learn' },
   { id: 'count_objects', title: 'Count', emoji: '🍎', world: 'number', route: 'CountObjects', blurb: 'How many?', kind: 'learn' },
   { id: 'number_train', title: 'Number Train', emoji: '🚂', world: 'number', route: 'NumberTrain', blurb: 'Fix the coaches', kind: 'learn' },
   { id: 'count_collect', title: 'Feed Monster', emoji: '👾', world: 'number', route: 'CountCollect', blurb: 'Give the right amount', kind: 'quiz' },
-  { id: 'before_after', title: 'Before & After', emoji: '◀️', world: 'number', route: 'BeforeAfter', blurb: 'What comes next?', kind: 'quiz' },
+  { id: 'before_after', title: 'Before & After', emoji: '◀️', world: 'number', route: 'BeforeAfter', blurb: 'Numbers & letters A–D', kind: 'quiz' },
   { id: 'missing_number', title: 'Missing Number', emoji: '🔢', world: 'number', route: 'MissingNumber', blurb: 'Fill the gap', kind: 'quiz' },
   { id: 'more_less', title: 'More or Less', emoji: '⚖️', world: 'number', route: 'MoreLess', blurb: 'Which has more?', kind: 'quiz' },
   // Shape

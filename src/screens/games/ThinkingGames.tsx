@@ -595,16 +595,18 @@ export function SortCategoryScreen({ navigation }: RootStackProps<'SortCategory'
     {
       prompt: 'Fruit or vegetable?',
       bins: [
-        { id: 'fruit', label: 'Fruits', emoji: '🍎', color: colors.coral },
-        { id: 'veg', label: 'Veggies', emoji: '🥕', color: colors.lime },
+        { id: 'fruit', label: 'Fruits', emoji: '🧺', hint: '🍓🍌', color: colors.coral },
+        { id: 'veg', label: 'Veggies', emoji: '🧺', hint: '🥕🥦', color: colors.lime },
       ],
       items: [
-        { emoji: '🍎', cat: 'fruit' },
+        { emoji: '🍓', cat: 'fruit' },
         { emoji: '🍌', cat: 'fruit' },
+        { emoji: '🍇', cat: 'fruit' },
+        { emoji: '🍊', cat: 'fruit' },
         { emoji: '🥕', cat: 'veg' },
         { emoji: '🥦', cat: 'veg' },
-        { emoji: '🍇', cat: 'fruit' },
         { emoji: '🌽', cat: 'veg' },
+        { emoji: '🥒', cat: 'veg' },
       ],
     },
     {
@@ -736,6 +738,7 @@ export function SortCategoryScreen({ navigation }: RootStackProps<'SortCategory'
               ]}
             >
               <Text style={styles.sortBinEmoji}>{b.emoji}</Text>
+              {'hint' in b && b.hint ? <Text style={styles.sortBinHint}>{b.hint}</Text> : null}
               <Text style={styles.sortBinText}>{b.label}</Text>
             </Pressable>
           ))}
@@ -1181,5 +1184,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   sortBinEmoji: { fontSize: 40, lineHeight: 48 },
+  sortBinHint: { fontSize: 18, lineHeight: 22, marginTop: -4, marginBottom: 2 },
   sortBinText: { ...typography.title, color: '#FFF', fontSize: 18 },
 });

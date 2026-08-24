@@ -61,9 +61,9 @@ function ActivityFrame({
         backTo={{ label: 'Color World', onPress: onBack }}
       />
       <View style={styles.body}>
-        <ContentStage>
+        <ContentStage contentStyle={styles.content}>
           <Text style={styles.prompt}>{prompt}</Text>
-          <View style={styles.content}>{children}</View>
+          {children}
           <ProgressIndicator current={progressCurrent} total={progressTotal} />
         </ContentStage>
       </View>
@@ -599,13 +599,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   content: {
-    flex: 1,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: 10,
     paddingTop: 4,
-    overflow: 'hidden',
   },
   heroStage: {
     width: '100%',
