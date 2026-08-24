@@ -7,7 +7,9 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { RootStackProps } from '../navigation/types';
-import { AppShell, AppHeader, ActivityCard } from '../components/ui';
+import { AppShell, AppHeader, ActivityCard, ContentStage } from '../components/ui';
+import { CreateBuilderList } from '../components/CreateBuilderList';
+import { GoodHabitList } from '../components/GoodHabitList';
 import { WORLDS, gamesByKind, GameDef, GameKind } from '../data/catalog';
 import { BACKGROUNDS } from '../data/colorActivities';
 import { colors, fonts, shadows } from '../theme';
@@ -35,8 +37,6 @@ const SECTION: Record<
 
 export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>) {
   const world = WORLDS.find((w) => w.id === route.params.worldId)!;
-  const learn = gamesByKind(world.id, 'learn');
-  const quiz = gamesByKind(world.id, 'quiz');
   const { completedGames } = useProgress();
   const { width } = useWindowDimensions();
 
@@ -47,7 +47,11 @@ export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>
 
   const openGame = (g: GameDef) => {
     speak(g.title);
-    navigation.navigate(g.route as never);
+    if (g.params) {
+      navigation.navigate(g.route as 'ShapeBuilder', g.params as { pack: 'shapes' | 'faces' | 'food' });
+    } else {
+      navigation.navigate(g.route as never);
+    }
   };
 
   const tileW = (count: number) => {
@@ -55,6 +59,53 @@ export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>
     const inner = width - padH * 2 - zonePad * 2;
     return (inner - gap * (cols - 1)) / cols;
   };
+
+  if (world.id === 'creative') {
+    return (
+      <AppShell background={bg}>
+        <AppHeader
+          title="Creative World"
+          titleEmoji={world.emoji}
+          left="back"
+          backTo={{
+            label: 'Back',
+            onPress: () => navigation.goBack(),
+          }}
+        />
+        <View style={styles.builderBody}>
+          <ContentStage>
+            <CreateBuilderList navigation={navigation} />
+          </ContentStage>
+        </View>
+      </AppShell>
+    );
+  }
+
+  if (world.id === 'story') {
+    return (
+      <AppShell background={bg}>
+        <AppHeader
+          title="Good Habits"
+          titleEmoji="🌟"
+          left="back"
+          backTo={{
+            label: 'Back',
+            onPress: () => navigation.goBack(),
+          }}
+        />
+        <View style={styles.builderBody}>
+          <ContentStage>
+            <GoodHabitList
+              onPick={(habitId) => navigation.navigate('StoryPlay', { habitId })}
+            />
+          </ContentStage>
+        </View>
+      </AppShell>
+    );
+  }
+
+  const learn = gamesByKind(world.id, 'learn');
+  const quiz = gamesByKind(world.id, 'quiz');
 
   return (
     <AppShell background={bg}>
@@ -149,6 +200,7 @@ function Zone({
 }
 
 const styles = StyleSheet.create({
+  builderBody: { flex: 1, paddingHorizontal: 14, paddingBottom: 8 },
   scroll: { paddingBottom: 36, gap: 14 },
   zone: {
     borderRadius: 28,

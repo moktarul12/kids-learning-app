@@ -75,8 +75,8 @@ const WORLDS: {
   },
   {
     id: 'story',
-    label: 'Story World',
-    blurb: 'Adventure',
+    label: 'Good Habits',
+    blurb: 'Brush, sleep & more',
     icon: require('../../assets/home/icon-story-world.png'),
     motion: 'bob',
     tint: '#9B7BFF',
@@ -114,7 +114,11 @@ export function MyWorldScreen({ navigation }: Props) {
               <Pressable
                 key={w.id}
                 onPress={() => {
-                  navigation.navigate('WorldHub', { worldId: w.id });
+                  if (w.id === 'story') {
+                    navigation.navigate('StoryPlay');
+                  } else {
+                    navigation.navigate('WorldHub', { worldId: w.id });
+                  }
                 }}
                 style={({ pressed }) => [
                   styles.portal,

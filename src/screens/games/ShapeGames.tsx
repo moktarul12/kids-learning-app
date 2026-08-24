@@ -545,6 +545,134 @@ const BUILD_PICTURES = [
   },
 ] as const;
 
+const FACE_PICTURES = [
+  {
+    id: 'smile',
+    title: 'Make a happy face',
+    ask: 'What makes a smile?',
+    almost: 'A big smile mouth!',
+    doneEmoji: '😊',
+    answer: 'smile',
+    layout: [
+      { kind: 'filled', emoji: '👀', label: 'Eyes' },
+      { kind: 'gap', shape: 'smile' },
+      { kind: 'filled', emoji: '👃', label: 'Nose' },
+    ],
+    options: [
+      { id: 'smile', emoji: '👄', label: 'Smile' },
+      { id: 'frown', emoji: '☹️', label: 'Frown' },
+      { id: 'star', emoji: '⭐', label: 'Star' },
+    ],
+  },
+  {
+    id: 'glasses',
+    title: 'Finish the face',
+    ask: 'What goes on the eyes?',
+    almost: 'Cute glasses!',
+    doneEmoji: '🤓',
+    answer: 'glasses',
+    layout: [
+      { kind: 'gap', shape: 'glasses' },
+      { kind: 'filled', emoji: '👃', label: 'Nose' },
+      { kind: 'filled', emoji: '👄', label: 'Smile' },
+    ],
+    options: [
+      { id: 'hat', emoji: '🎩', label: 'Hat' },
+      { id: 'glasses', emoji: '👓', label: 'Glasses' },
+      { id: 'bow', emoji: '🎀', label: 'Bow' },
+    ],
+  },
+  {
+    id: 'ears',
+    title: 'Bunny face',
+    ask: 'What does a bunny need?',
+    almost: 'Long bunny ears!',
+    doneEmoji: '🐰',
+    answer: 'ears',
+    layout: [
+      { kind: 'gap', shape: 'ears' },
+      { kind: 'filled', emoji: '👀', label: 'Eyes' },
+      { kind: 'filled', emoji: '👄', label: 'Nose' },
+    ],
+    options: [
+      { id: 'ears', emoji: '👂', label: 'Ears' },
+      { id: 'horn', emoji: '🦄', label: 'Horn' },
+      { id: 'crown', emoji: '👑', label: 'Crown' },
+    ],
+  },
+] as const;
+
+const FOOD_PICTURES = [
+  {
+    id: 'plate',
+    title: 'Build lunch',
+    ask: 'What healthy food goes here?',
+    almost: 'Veggies are yummy!',
+    doneEmoji: '🥗',
+    answer: 'veggies',
+    layout: [
+      { kind: 'filled', emoji: '🍚', label: 'Rice' },
+      { kind: 'gap', shape: 'veggies' },
+      { kind: 'filled', emoji: '🥛', label: 'Milk' },
+    ],
+    options: [
+      { id: 'candy', emoji: '🍬', label: 'Candy' },
+      { id: 'veggies', emoji: '🥦', label: 'Veggies' },
+      { id: 'chips', emoji: '🍟', label: 'Chips' },
+    ],
+  },
+  {
+    id: 'fruit',
+    title: 'Fruit bowl',
+    ask: 'Which fruit is missing?',
+    almost: 'A juicy apple!',
+    doneEmoji: '🍎',
+    answer: 'apple',
+    layout: [
+      { kind: 'filled', emoji: '🍌', label: 'Banana' },
+      { kind: 'gap', shape: 'apple' },
+      { kind: 'filled', emoji: '🍇', label: 'Grapes' },
+    ],
+    options: [
+      { id: 'apple', emoji: '🍎', label: 'Apple' },
+      { id: 'cake', emoji: '🎂', label: 'Cake' },
+      { id: 'soda', emoji: '🥤', label: 'Soda' },
+    ],
+  },
+  {
+    id: 'breakfast',
+    title: 'Breakfast time',
+    ask: 'What helps you grow?',
+    almost: 'Eggs for energy!',
+    doneEmoji: '🍳',
+    answer: 'egg',
+    layout: [
+      { kind: 'gap', shape: 'egg' },
+      { kind: 'filled', emoji: '🍞', label: 'Bread' },
+      { kind: 'filled', emoji: '🥛', label: 'Milk' },
+    ],
+    options: [
+      { id: 'candy', emoji: '🍭', label: 'Candy' },
+      { id: 'egg', emoji: '🍳', label: 'Egg' },
+      { id: 'cookie', emoji: '🍪', label: 'Cookie' },
+    ],
+  },
+] as const;
+
+type BuildPack = 'shapes' | 'faces' | 'food';
+
+const PACKS: Record<BuildPack, readonly (typeof BUILD_PICTURES)[number][] | readonly (typeof FACE_PICTURES)[number][] | readonly (typeof FOOD_PICTURES)[number][]> = {
+  shapes: BUILD_PICTURES,
+  faces: FACE_PICTURES,
+  food: FOOD_PICTURES,
+};
+
+const PACK_META: Record<BuildPack, { title: string; back: string; skill: 'shapes' | 'creativity'; gameId: string }> = {
+  shapes: { title: 'Shape Builder', back: 'Back', skill: 'shapes', gameId: 'shape_builder' },
+  faces: { title: 'Happy Face', back: 'Create', skill: 'creativity', gameId: 'create_face' },
+  food: { title: 'Yummy Plate', back: 'Create', skill: 'creativity', gameId: 'create_plate' },
+};
+
 const SHAPE_EMOJI: Record<string, string> = {
   triangle: '🔺',
   circle: '⭕',
@@ -552,34 +680,42 @@ const SHAPE_EMOJI: Record<string, string> = {
   star: '⭐',
 };
 
-export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'>) {
+export function ShapeBuilderScreen({ navigation, route }: RootStackProps<'ShapeBuilder'>) {
+  const pack: BuildPack = route.params?.pack ?? 'shapes';
+  const meta = PACK_META[pack];
+  const pictures = PACKS[pack];
+
   const { showReward, celebrate, almost, playNext, streak, round, hint } = useGameSession({
-    gameId: 'shape_builder',
-    skill: 'shapes',
-    badge: 'shape_builder',
+    gameId: meta.gameId,
+    skill: meta.skill,
+    badge: pack === 'shapes' ? 'shape_builder' : 'creative_star',
   });
 
-  const picture = useMemo(() => BUILD_PICTURES[round % BUILD_PICTURES.length], [round]);
+  const picture = useMemo(() => pictures[round % pictures.length], [round, pictures]);
   const options = useMemo(() => shuffle([...picture.options]), [picture, round]);
   const [picked, setPicked] = useState<string | null>(null);
   const [wrong, setWrong] = useState<string | null>(null);
   const locked = picked === picture.answer;
+  const answerEmoji =
+    picture.options.find((o) => o.id === picture.answer)?.emoji ??
+    SHAPE_EMOJI[picture.answer] ??
+    '⭐';
 
   useEffect(() => {
     setPicked(null);
     setWrong(null);
     speak(picture.ask);
-  }, [round, picture.ask]);
+  }, [round, picture.ask, pack]);
 
   return (
     <GameShell
-      title="Shape Builder"
+      title={meta.title}
       prompt={picture.ask}
       promptEmoji={picture.doneEmoji}
       round={round}
       onBack={() => navigation.goBack()}
-      backLabel="Shape World"
-      backEmoji="🔷"
+      backLabel={meta.back}
+      backEmoji="🧱"
       showReward={showReward}
       onNext={playNext}
       streak={streak}
@@ -594,7 +730,7 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
           <View style={styles.buildBannerCopy}>
             <Text style={styles.buildBannerTitle}>{picture.title}</Text>
             <Text style={styles.buildBannerSub}>
-              {locked ? 'Picture complete!' : 'Tap the missing shape'}
+              {locked ? 'Picture complete!' : 'Tap what is missing'}
             </Text>
           </View>
         </View>
@@ -620,7 +756,7 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
                     </LivingIcon>
                   ) : (
                     <Text style={styles.buildSlotEmoji}>
-                      {isGap ? SHAPE_EMOJI[picture.answer] : slot.emoji}
+                      {isGap ? answerEmoji : slot.emoji}
                     </Text>
                   )}
                   <Text style={styles.buildSlotLabel}>
@@ -637,7 +773,7 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
           ) : null}
         </View>
 
-        <Text style={styles.buildTapHint}>{locked ? 'Great job!' : 'Pick the shape that fits'}</Text>
+        <Text style={styles.buildTapHint}>{locked ? 'Great job!' : 'Pick what fits'}</Text>
 
         <View style={styles.buildParts}>
           {options.map((o) => {
@@ -676,7 +812,6 @@ export function ShapeBuilderScreen({ navigation }: RootStackProps<'ShapeBuilder'
     </GameShell>
   );
 }
-
 
 const styles = StyleSheet.create({
   grid: {

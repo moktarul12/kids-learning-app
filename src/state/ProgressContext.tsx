@@ -60,7 +60,7 @@ const defaultDaily = () => [
   { id: 'count_five', label: 'Count to 5', done: false, route: 'CountObjects' },
   { id: 'find_shape', label: 'Find triangles', done: false, route: 'FindShape' },
   { id: 'pattern', label: 'Finish a pattern', done: false, route: 'PatternGame' },
-  { id: 'create', label: 'Create something', done: false, route: 'Coloring' },
+  { id: 'create', label: 'Build a picture', done: false, route: 'ShapeBuilder' },
 ];
 
 const initialState: ProgressState = {

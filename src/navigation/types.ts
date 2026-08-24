@@ -25,7 +25,7 @@ export type RootStackParamList = {
   FindShape: undefined;
   MatchShape: undefined;
   ShapePuzzle: undefined;
-  ShapeBuilder: undefined;
+  ShapeBuilder: { pack?: 'shapes' | 'faces' | 'food' } | undefined;
   MemoryGame: undefined;
   OddOneOut: undefined;
   PatternGame: undefined;
@@ -33,7 +33,7 @@ export type RootStackParamList = {
   SortCategory: undefined;
   Coloring: undefined;
   MyWorldCreator: undefined;
-  StoryPlay: undefined;
+  StoryPlay: { habitId?: string } | undefined;
 };
 
 export type MainTabParamList = {

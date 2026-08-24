@@ -11,6 +11,8 @@ import { typography } from '../../theme/typography';
 import { useGameSession } from '../../hooks/useGameSession';
 import { useProgress } from '../../state/ProgressContext';
 import { cheerKid, greetKid, kidFirst, speak } from '../../services/voice';
+import { GoodHabitList } from '../../components/GoodHabitList';
+import { GOOD_HABITS } from '../../data/goodHabits';
 
 /** ─── Paint Party: pick a friend, stamp colorful blobs ─── */
 const PAINT_FRIENDS = [
@@ -420,171 +422,52 @@ export function MyWorldCreatorScreen({ navigation }: RootStackProps<'MyWorldCrea
   );
 }
 
-/** ─── Story World: pick a tale, tap what happens next ─── */
-type StoryChoice = { emoji: string; label: string; next: number | 'win' | 'retry' };
-type StoryPage = { text: string; emoji: string; choices: StoryChoice[] };
+/** ─── Good Habits: interactive morning, sleep, kindness stories ─── */
 
-const STORIES: {
-  id: string;
-  title: string;
-  cover: string;
-  pages: StoryPage[];
-}[] = [
-  {
-    id: 'bunny',
-    title: 'Bunny Adventure',
-    cover: '🐰',
-    pages: [
-      {
-        text: 'Bunny finds a magical door. What should Bunny do?',
-        emoji: '🐰🚪',
-        choices: [
-          { emoji: '🚪', label: 'Open it', next: 1 },
-          { emoji: '🌳', label: 'Go to the garden', next: 2 },
-        ],
-      },
-      {
-        text: 'Inside — 3 glowing apples! How many?',
-        emoji: '🍎🍎🍎',
-        choices: [
-          { emoji: '2️⃣', label: 'Two', next: 'retry' },
-          { emoji: '3️⃣', label: 'Three', next: 3 },
-          { emoji: '5️⃣', label: 'Five', next: 'retry' },
-        ],
-      },
-      {
-        text: 'In the garden Bunny sees a rainbow!',
-        emoji: '🌈🐰',
-        choices: [{ emoji: '🎉', label: 'Dance under it', next: 3 }],
-      },
-      {
-        text: 'What a happy ending for Bunny!',
-        emoji: '🎉🐰⭐',
-        choices: [{ emoji: '⭐', label: 'The end', next: 'win' }],
-      },
-    ],
-  },
-  {
-    id: 'rocket',
-    title: 'Space Pup',
-    cover: '🐶🚀',
-    pages: [
-      {
-        text: 'Space Pup is ready for takeoff! Where to?',
-        emoji: '🐶🚀',
-        choices: [
-          { emoji: '🌙', label: 'The Moon', next: 1 },
-          { emoji: '⭐', label: 'A bright star', next: 2 },
-        ],
-      },
-      {
-        text: 'On the Moon Pup finds a blue rock. What color is it?',
-        emoji: '🌙🔵',
-        choices: [
-          { emoji: '🔴', label: 'Red', next: 'retry' },
-          { emoji: '🔵', label: 'Blue', next: 3 },
-          { emoji: '🟢', label: 'Green', next: 'retry' },
-        ],
-      },
-      {
-        text: 'The star sparkles! Pup waves hello!',
-        emoji: '⭐🐶',
-        choices: [{ emoji: '👋', label: 'Wave back', next: 3 }],
-      },
-      {
-        text: 'Space Pup flies home safely. Yay!',
-        emoji: '🏠🐶✨',
-        choices: [{ emoji: '⭐', label: 'The end', next: 'win' }],
-      },
-    ],
-  },
-  {
-    id: 'ocean',
-    title: 'Ocean Friends',
-    cover: '🐠',
-    pages: [
-      {
-        text: 'Little Fish wants a friend. Who to visit?',
-        emoji: '🐠🌊',
-        choices: [
-          { emoji: '🐙', label: 'Octopus', next: 1 },
-          { emoji: '🐢', label: 'Turtle', next: 2 },
-        ],
-      },
-      {
-        text: 'Octopus has 8 arms! Is that a circle, square, or… wait — how many is more: 5 or 8?',
-        emoji: '🐙',
-        choices: [
-          { emoji: '5️⃣', label: '5 is more', next: 'retry' },
-          { emoji: '8️⃣', label: '8 is more', next: 3 },
-        ],
-      },
-      {
-        text: 'Turtle is slow and kind. They swim together!',
-        emoji: '🐢🐠',
-        choices: [{ emoji: '🌊', label: 'Swim along', next: 3 }],
-      },
-      {
-        text: 'Best ocean friends forever!',
-        emoji: '🐠💙🐢',
-        choices: [{ emoji: '⭐', label: 'The end', next: 'win' }],
-      },
-    ],
-  },
-];
-
-export function StoryPlayScreen({ navigation }: RootStackProps<'StoryPlay'>) {
+export function StoryPlayScreen({ navigation, route }: RootStackProps<'StoryPlay'>) {
+  const habitFromRoute = route.params?.habitId ?? null;
   const { showReward, celebrate, playNext, almost, hint, streak, round } = useGameSession({
-    gameId: 'story_bunny',
+    gameId: 'story_habits',
     skill: 'stories',
   });
-  const [storyId, setStoryId] = useState<string | null>(null);
+  const [storyId, setStoryId] = useState<string | null>(habitFromRoute);
   const [page, setPage] = useState(0);
 
-  const story = STORIES.find((s) => s.id === storyId) ?? null;
+  const story = GOOD_HABITS.find((s) => s.id === storyId) ?? null;
   const scene = story?.pages[page];
 
   useEffect(() => {
-    setStoryId(null);
+    setStoryId(habitFromRoute);
     setPage(0);
-    greetKid('story time');
-    const t = setTimeout(() => speak('Pick a story!'), 700);
+    if (habitFromRoute) return;
+    greetKid('good habits');
+    const t = setTimeout(() => speak('Pick a good habit!'), 700);
     return () => clearTimeout(t);
-  }, [round]);
+  }, [round, habitFromRoute]);
 
   useEffect(() => {
     if (scene) speak(scene.text);
-  }, [page, storyId]);
+  }, [page, storyId, scene]);
 
   if (!story || !scene) {
     return (
       <GameShell
-        title="Story World"
-        prompt="Pick a story!"
-        promptEmoji="📚"
+        title="Good Habits"
+        prompt="Pick a good habit!"
+        promptEmoji="🌟"
         round={round}
         onBack={() => navigation.goBack()}
-        backLabel="Story World"
+        backLabel="My World"
         showReward={showReward}
         onNext={playNext}
         streak={streak}
       >
-        <View style={styles.storyPickGrid}>
-          {STORIES.map((s) => (
-            <Pressable
-              key={s.id}
-              onPress={() => {
-                setStoryId(s.id);
-                setPage(0);
-                speak(s.title);
-              }}
-              style={styles.storyPickCard}
-            >
-              <Text style={styles.storyPickEmoji}>{s.cover}</Text>
-              <Text style={styles.storyPickTitle}>{s.title}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <GoodHabitList
+          onPick={(id) => {
+            setStoryId(id);
+            setPage(0);
+          }}
+        />
       </GameShell>
     );
   }
@@ -600,14 +483,14 @@ export function StoryPlayScreen({ navigation }: RootStackProps<'StoryPlay'>) {
       onBack={() => {
         setStoryId(null);
         setPage(0);
-        speak('Pick a story!');
+        speak('Pick a good habit!');
       }}
-      backLabel="Stories"
+      backLabel="Good Habits"
       showReward={showReward}
       onNext={playNext}
       streak={streak}
       hint={hint}
-      rewardMessage="Great story!"
+      rewardMessage="Great habit!"
     >
       <LivingIcon motion="bob">
         <Text style={styles.storySceneEmoji}>{scene.emoji}</Text>
@@ -624,7 +507,7 @@ export function StoryPlayScreen({ navigation }: RootStackProps<'StoryPlay'>) {
               }
               if (c.next === 'win') {
                 cheerKid();
-                celebrate('Great story!');
+                celebrate('Great habit!');
                 return;
               }
               setPage(c.next);
@@ -821,19 +704,6 @@ const styles = StyleSheet.create({
   hearBtnText: { fontFamily: 'Fredoka_700Bold', color: '#FFF', fontSize: 14 },
   redo: { paddingVertical: 8 },
   redoText: { fontFamily: 'Fredoka_700Bold', color: colors.inkMuted, fontSize: 14 },
-  storyPickGrid: { gap: 12, width: '100%' },
-  storyPickCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    backgroundColor: '#F5EEFF',
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 3,
-    borderColor: '#D4B8F8',
-  },
-  storyPickEmoji: { fontSize: 44 },
-  storyPickTitle: { fontFamily: 'Fredoka_700Bold', fontSize: 18, color: colors.ink, flex: 1 },
   storySceneEmoji: { fontSize: 64, textAlign: 'center' },
   storySceneText: {
     ...typography.body,

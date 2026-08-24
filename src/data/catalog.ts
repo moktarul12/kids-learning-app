@@ -10,6 +10,8 @@ export type GameDef = {
   route: string;
   blurb: string;
   kind: GameKind;
+  /** Optional stack params (e.g. ShapeBuilder pack) */
+  params?: Record<string, string>;
 };
 
 export const WORLDS: {
@@ -23,8 +25,8 @@ export const WORLDS: {
   { id: 'number', title: 'Number', emoji: '🔢', color: '#4BA3FF', subtitle: 'Count & play' },
   { id: 'shape', title: 'Shape', emoji: '🔶', color: '#5ECF5A', subtitle: 'Build & spot shapes' },
   { id: 'thinking', title: 'Thinking', emoji: '🧠', color: '#FFD93D', subtitle: 'Solve fun puzzles' },
-  { id: 'creative', title: 'Creative', emoji: '🎨', color: '#FF9A3C', subtitle: 'Make something new' },
-  { id: 'story', title: 'Story', emoji: '📚', color: '#9B7BFF', subtitle: 'Choose your path' },
+  { id: 'creative', title: 'Creative', emoji: '🎨', color: '#FF9A3C', subtitle: 'Build fun pictures' },
+  { id: 'story', title: 'Good Habits', emoji: '🌟', color: '#9B7BFF', subtitle: 'Brush, sleep & more' },
 ];
 
 export const GAMES: GameDef[] = [
@@ -43,7 +45,7 @@ export const GAMES: GameDef[] = [
   { id: 'more_less', title: 'More or Less', emoji: '⚖️', world: 'number', route: 'MoreLess', blurb: 'Which has more?', kind: 'quiz' },
   // Shape
   { id: 'find_shape', title: 'Find Shapes', emoji: '🔺', world: 'shape', route: 'FindShape', blurb: 'Spot them all', kind: 'learn' },
-  { id: 'shape_builder', title: 'Shape Builder', emoji: '🏠', world: 'shape', route: 'ShapeBuilder', blurb: 'Finish the picture', kind: 'learn' },
+  { id: 'shape_builder', title: 'Shape Builder', emoji: '🏠', world: 'shape', route: 'ShapeBuilder', blurb: 'Finish the picture', kind: 'learn', params: { pack: 'shapes' } },
   { id: 'match_shape', title: 'Shape Match', emoji: '🧩', world: 'shape', route: 'MatchShape', blurb: 'Match to objects', kind: 'quiz' },
   { id: 'shape_puzzle', title: 'Shape Puzzle', emoji: '🏠', world: 'shape', route: 'ShapePuzzle', blurb: 'Finish the picture', kind: 'quiz' },
   // Thinking
@@ -52,10 +54,10 @@ export const GAMES: GameDef[] = [
   { id: 'memory', title: 'Memory', emoji: '🧠', world: 'thinking', route: 'MemoryGame', blurb: 'Flip & remember', kind: 'quiz' },
   { id: 'odd_one', title: 'Odd One Out', emoji: '🔍', world: 'thinking', route: 'OddOneOut', blurb: 'Find the different', kind: 'quiz' },
   { id: 'sort_category', title: 'Sort It', emoji: '📦', world: 'thinking', route: 'SortCategory', blurb: 'Put things away', kind: 'quiz' },
-  // Creative + story — learning play
-  { id: 'coloring', title: 'Paint Party', emoji: '🎨', world: 'creative', route: 'Coloring', blurb: 'Paint a friend', kind: 'learn' },
-  { id: 'my_world', title: 'My Day', emoji: '🌍', world: 'creative', route: 'MyWorldCreator', blurb: 'Build your day', kind: 'learn' },
-  { id: 'story_bunny', title: 'Story Time', emoji: '📚', world: 'story', route: 'StoryPlay', blurb: 'Pick & play a tale', kind: 'learn' },
+  // Creative — builder-style only (like Shape Builder)
+  { id: 'create_shapes', title: 'Build a Picture', emoji: '🧱', world: 'creative', route: 'ShapeBuilder', blurb: 'Finish with shapes', kind: 'learn', params: { pack: 'shapes' } },
+  { id: 'create_face', title: 'Happy Face', emoji: '😊', world: 'creative', route: 'ShapeBuilder', blurb: 'Build a smile', kind: 'learn', params: { pack: 'faces' } },
+  { id: 'create_plate', title: 'Yummy Plate', emoji: '🍽️', world: 'creative', route: 'ShapeBuilder', blurb: 'Build a meal', kind: 'learn', params: { pack: 'food' } },
 ];
 
 export function gamesForWorld(worldId: WorldId) {

@@ -58,6 +58,7 @@ export function GameShell({
       <SoftParkBackground>
         <GameHeader
           title={title}
+          titleEmoji={promptEmoji}
           onBack={onBack}
           prompt={prompt}
           onSpeak={onSpeak}

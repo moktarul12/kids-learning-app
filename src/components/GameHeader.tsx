@@ -4,6 +4,7 @@ import { speak } from '../services/voice';
 
 type Props = {
   title: string;
+  titleEmoji?: string;
   onBack?: () => void;
   prompt?: string;
   onSpeak?: () => void;
@@ -13,9 +14,10 @@ type Props = {
   backEmoji?: string;
 };
 
-/** ← · title · speaker — back arrow only, no breadcrumb */
+/** Back arrow · full-width title banner · speaker */
 export function GameHeader({
   title,
+  titleEmoji,
   onBack,
   prompt,
   onSpeak,
@@ -33,6 +35,7 @@ export function GameHeader({
   return (
     <AppHeader
       title={title}
+      titleEmoji={titleEmoji ?? backEmoji}
       subtitle={typeof round === 'number' ? `Round ${round + 1}` : undefined}
       left="back"
       right="speaker"

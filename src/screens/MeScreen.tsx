@@ -43,8 +43,10 @@ const SKILLS = [
   { id: 'creativity' as const, label: 'Creativity', emoji: '🎨' },
 ];
 
+const ANDROID_PACKAGE = 'com.dromominds.kiddoo';
+const PLAY_STORE_WEB = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`;
 const PLAY_STORE_HINT =
-  'Hey! Try Kiddo with me — Learn · Explore · Grow!\nhttps://dromominds.in';
+  `Hey! Try Kiddo with me — Learn · Explore · Grow!\n${PLAY_STORE_WEB}`;
 
 export function MeScreen({ navigation }: Props) {
   const {
@@ -100,6 +102,14 @@ export function MeScreen({ navigation }: Props) {
     } catch {
       /* cancelled */
     }
+  };
+
+  const rateApp = () => {
+    speak('Rate Kiddo on Play Store');
+    const market = `market://details?id=${ANDROID_PACKAGE}`;
+    Linking.openURL(market).catch(() => {
+      Linking.openURL(PLAY_STORE_WEB).catch(() => {});
+    });
   };
 
   const openAbout = () => {
@@ -198,6 +208,15 @@ export function MeScreen({ navigation }: Props) {
             >
               <Text style={{ fontSize: 24 }}>🗺️</Text>
               <Text style={styles.dailyText}>Daily Adventure</Text>
+            </Pressable>
+
+            <Pressable style={[styles.rate, shadows.soft]} onPress={rateApp}>
+              <Text style={{ fontSize: 24 }}>⭐</Text>
+              <View style={styles.aboutCopy}>
+                <Text style={styles.rateText}>Rate this app</Text>
+                <Text style={styles.rateSub}>Open Play Store</Text>
+              </View>
+              <Text style={styles.rateGo}>›</Text>
             </Pressable>
 
             <Pressable style={[styles.about, shadows.soft]} onPress={openAbout}>
@@ -418,6 +437,19 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   dailyText: { fontFamily: fonts.heading, color: colors.white, fontSize: 18 },
+  rate: {
+    backgroundColor: '#FFF4C4',
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 3,
+    borderColor: '#FFD93D',
+  },
+  rateText: { fontFamily: fonts.heading, color: colors.darkText, fontSize: 18 },
+  rateSub: { fontFamily: fonts.label, color: colors.secondaryText, fontSize: 13, marginTop: 2 },
+  rateGo: { fontFamily: fonts.heading, fontSize: 28, color: '#E6A800', lineHeight: 30 },
   about: {
     backgroundColor: colors.white,
     borderRadius: 18,

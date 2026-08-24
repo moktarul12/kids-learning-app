@@ -96,9 +96,9 @@ export type HeaderRight = 'speaker' | 'none';
 export type HeaderBackTo = { label: string; onPress: () => void; emoji?: string };
 
 /**
- * Single-row header:
- *   ← / avatar · Title · Round · speaker
- * Back arrow alone handles navigation (no breadcrumb trail).
+ * Header layout (kid-friendly, no cramped ellipsis):
+ *   Row 1: [← circle] ····· [🔊]
+ *   Row 2: emoji + full title (wraps up to 2 lines) + round chip
  */
 export function AppHeader({
   title,
@@ -115,7 +115,7 @@ export function AppHeader({
   titleEmoji?: string;
   left?: HeaderLeft;
   right?: HeaderRight;
-  /** Previous place — drives the ← button only */
+  /** Previous place — drives the back button only */
   backTo?: HeaderBackTo;
   onLeftPress?: () => void;
   onRightPress?: () => void;
@@ -133,14 +133,17 @@ export function AppHeader({
       <Pressable
         onPress={goBack}
         accessibilityLabel="Go back"
-        hitSlop={8}
+        hitSlop={12}
         style={({ pressed }) => [
-          styles.backPill,
-          { transform: [{ scale: pressed ? 0.94 : 1 }], opacity: pressed ? 0.9 : 1 },
+          styles.backCircle,
+          { transform: [{ scale: pressed ? 0.92 : 1 }], opacity: pressed ? 0.9 : 1 },
         ]}
       >
-        <Text style={styles.backPillChevron}>◀</Text>
-        <Text style={styles.backPillText}>Back</Text>
+        {/* Thick arrow drawn with Views — reads clearly at a glance */}
+        <View style={styles.backArrowGlyph}>
+          <View style={styles.backArrowHead} />
+          <View style={styles.backArrowShaft} />
+        </View>
       </Pressable>
     ) : (
       <View style={styles.headerSide} />
@@ -149,25 +152,56 @@ export function AppHeader({
   const rightSlot =
     right === 'speaker' ? (
       <IconButton emoji="🔊" onPress={onRightPress} accessibilityLabel="Sound" />
+    ) : left === 'avatar' && !backTo ? (
+      <View style={styles.headerSide} />
     ) : (
       <View style={styles.headerSide} />
     );
 
+  const showTitleBlock = Boolean(title?.trim());
+  /** Hub tabs: avatar + title on one row. Games: controls row, then full-width title banner. */
+  const isHubStyle = left === 'avatar' && !showBack;
+
   return (
     <View style={[styles.appHeaderWrap, { paddingTop: Math.max(insets.top, 8) + 4 }]}>
-      <View style={styles.appHeaderRow}>
-        {leftSlot}
-        <View style={styles.appHeaderMid}>
-          <View style={styles.titleRow}>
-            {titleEmoji ? <Text style={styles.titleEmoji}>{titleEmoji}</Text> : null}
-            <Text style={styles.appHeaderTitle} numberOfLines={1}>
+      {isHubStyle ? (
+        <View style={styles.appHeaderRow}>
+          {leftSlot}
+          <View style={styles.appHeaderMid}>
+            <Text style={[styles.appHeaderTitle, styles.appHeaderTitleCenter]} numberOfLines={2}>
               {title}
             </Text>
+            {subtitle ? <Text style={styles.appHeaderSub}>{subtitle}</Text> : null}
           </View>
-          {subtitle ? <Text style={styles.appHeaderSub}>{subtitle}</Text> : null}
+          {rightSlot}
         </View>
-        {rightSlot}
-      </View>
+      ) : (
+        <>
+          <View style={styles.appHeaderRow}>
+            {leftSlot}
+            <View style={styles.appHeaderSpacer} />
+            {rightSlot}
+          </View>
+
+          {showTitleBlock ? (
+            <View style={styles.titleBanner}>
+              <View style={styles.titleBannerInner}>
+                {titleEmoji ? <Text style={styles.titleEmojiHero}>{titleEmoji}</Text> : null}
+                <View style={styles.titleTextCol}>
+                  <Text style={styles.appHeaderTitle} numberOfLines={2}>
+                    {title}
+                  </Text>
+                  {subtitle ? (
+                    <View style={styles.roundChip}>
+                      <Text style={styles.roundChipText}>{subtitle}</Text>
+                    </View>
+                  ) : null}
+                </View>
+              </View>
+            </View>
+          ) : null}
+        </>
+      )}
     </View>
   );
 }
@@ -412,30 +446,44 @@ const styles = StyleSheet.create({
   },
   iconBtnText: { fontSize: 22, color: colors.white },
   iconBtnImage: { width: 52, height: 52 },
-  backPill: {
-    flexDirection: 'row',
+  /** Chunky circle + drawn chevron (arrow only) */
+  backCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#FF9A3C',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FFD93D',
-    paddingLeft: 12,
-    paddingRight: 14,
-    paddingVertical: 10,
-    borderRadius: 22,
+    justifyContent: 'center',
     borderWidth: 3,
-    borderColor: '#F5C518',
-    minWidth: 88,
+    borderColor: '#FFE08A',
     ...shadows.soft,
   },
-  backPillChevron: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#1E2A3A',
-    marginTop: 1,
+  backArrowGlyph: {
+    width: 22,
+    height: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -2,
   },
-  backPillText: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: '#1E2A3A',
+  backArrowHead: {
+    position: 'absolute',
+    left: 0,
+    width: 0,
+    height: 0,
+    borderTopWidth: 9,
+    borderBottomWidth: 9,
+    borderRightWidth: 12,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderRightColor: '#FFFFFF',
+  },
+  backArrowShaft: {
+    position: 'absolute',
+    left: 8,
+    width: 14,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FFFFFF',
   },
 
   rewards: { flexDirection: 'row', alignItems: 'center', gap: 6 },
@@ -477,8 +525,9 @@ const styles = StyleSheet.create({
   appHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 48,
+    minHeight: 52,
   },
+  appHeaderSpacer: { flex: 1 },
   // legacy alias kept for any leftover refs
   appHeader: {
     flexDirection: 'row',
@@ -489,8 +538,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   headerSide: {
-    width: 48,
-    height: 48,
+    width: 52,
+    height: 52,
   },
   headerSideWide: {
     width: 132,
@@ -513,6 +562,30 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   avatarLogo: { width: 48, height: 48 },
+  titleBanner: {
+    width: '100%',
+  },
+  titleBannerInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(255,255,255,0.94)',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 2,
+    borderColor: '#D7E6F7',
+    ...shadows.soft,
+  },
+  titleEmojiHero: {
+    fontSize: 28,
+    lineHeight: 34,
+  },
+  titleTextCol: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4,
+  },
   appHeaderMid: {
     flex: 1,
     alignItems: 'center',
@@ -529,11 +602,29 @@ const styles = StyleSheet.create({
   titleEmoji: { fontSize: 22 },
   appHeaderTitle: {
     fontFamily: fonts.heading,
-    fontSize: 22,
+    fontSize: 20,
     color: colors.darkText,
     letterSpacing: 0.2,
+    textAlign: 'left',
+    lineHeight: 26,
+  },
+  appHeaderTitleCenter: {
     textAlign: 'center',
-    flexShrink: 1,
+    fontSize: 22,
+  },
+  roundChip: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E8F4FF',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: '#A8D4F0',
+  },
+  roundChipText: {
+    fontFamily: fonts.label,
+    fontSize: 12,
+    color: colors.primaryBlue,
   },
   subRow: {
     flexDirection: 'row',
@@ -549,7 +640,7 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   appHeaderSub: {
-    fontFamily: fonts.body,
+    fontFamily: fonts.label,
     fontSize: 13,
     color: colors.secondaryText,
     marginTop: 1,
