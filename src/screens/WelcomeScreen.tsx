@@ -6,16 +6,17 @@ import { WorldScene, WhiteStage } from '../components/SkyBackground';
 import { BigButton } from '../components/BigButton';
 import { colors } from '../theme/colors';
 import { useProgress } from '../state/ProgressContext';
-import { VOICE } from '../services/voice';
+import { greetKid } from '../services/voice';
 
 /** Screen 2 — Welcome / Start */
 export function WelcomeScreen({ navigation }: RootStackProps<'Welcome'>) {
   const insets = useSafeAreaInsets();
-  const { startAdventure, hasStarted } = useProgress();
+  const { startAdventure, hasStarted, kidName } = useProgress();
 
   useEffect(() => {
-    VOICE.welcome();
-  }, []);
+    const t = setTimeout(() => greetKid(), 400);
+    return () => clearTimeout(t);
+  }, [kidName]);
 
   const go = () => {
     startAdventure();

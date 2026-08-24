@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setKidName as syncVoiceName } from '../services/voice';
 
 export type SkillId = 'colors' | 'numbers' | 'shapes' | 'thinking' | 'creativity' | 'stories';
 
@@ -29,11 +30,17 @@ type ProgressState = {
   dailyTasks: { id: string; label: string; done: boolean; route?: string }[];
   dailyDate: string;
   unlockedWorlds: string[];
+  /** Child's first name for personalized voice */
+  kidName: string;
+  /** ISO date YYYY-MM-DD or empty */
+  kidDob: string;
 };
 
 type ProgressContextValue = ProgressState & {
   ready: boolean;
+  kidAge: number | null;
   startAdventure: () => void;
+  setKidProfile: (name: string, dob: string) => void;
   addReward: (opts: {
     stars?: number;
     coins?: number;
@@ -46,7 +53,7 @@ type ProgressContextValue = ProgressState & {
   resetDailyIfNeeded: () => void;
 };
 
-const STORAGE_KEY = 'kids_learning_progress_v1';
+const STORAGE_KEY = 'kids_learning_progress_v2';
 
 const defaultDaily = () => [
   { id: 'find_red', label: 'Find 3 red things', done: false, route: 'FindColor' },
@@ -74,12 +81,26 @@ const initialState: ProgressState = {
   dailyTasks: defaultDaily(),
   dailyDate: new Date().toDateString(),
   unlockedWorlds: ['color', 'number', 'shape', 'thinking', 'creative', 'story'],
+  kidName: '',
+  kidDob: '',
 };
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
 
 function today() {
   return new Date().toDateString();
+}
+
+export function ageFromDob(dob: string): number | null {
+  if (!dob || !/^\d{4}-\d{2}-\d{2}$/.test(dob)) return null;
+  const born = new Date(dob + 'T12:00:00');
+  if (Number.isNaN(born.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - born.getFullYear();
+  const m = now.getMonth() - born.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < born.getDate())) age -= 1;
+  if (age < 0 || age > 18) return null;
+  return age;
 }
 
 export function ProgressProvider({ children }: { children: React.ReactNode }) {
@@ -90,13 +111,17 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw) as ProgressState;
-          if (parsed.dailyDate !== today()) {
-            parsed.dailyDate = today();
-            parsed.dailyTasks = defaultDaily();
+        const legacy = !raw ? await AsyncStorage.getItem('kids_learning_progress_v1') : null;
+        const source = raw || legacy;
+        if (source) {
+          const parsed = JSON.parse(source) as Partial<ProgressState>;
+          const next = { ...initialState, ...parsed };
+          if (next.dailyDate !== today()) {
+            next.dailyDate = today();
+            next.dailyTasks = defaultDaily();
           }
-          setState({ ...initialState, ...parsed });
+          setState(next);
+          syncVoiceName(next.kidName || '');
         }
       } catch {
         // keep defaults
@@ -109,10 +134,18 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!ready) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => {});
+    syncVoiceName(state.kidName);
   }, [state, ready]);
 
   const startAdventure = useCallback(() => {
     setState((s) => ({ ...s, hasStarted: true }));
+  }, []);
+
+  const setKidProfile = useCallback((name: string, dob: string) => {
+    const kidName = name.trim().slice(0, 24);
+    const kidDob = /^\d{4}-\d{2}-\d{2}$/.test(dob) ? dob : '';
+    syncVoiceName(kidName);
+    setState((s) => ({ ...s, kidName, kidDob }));
   }, []);
 
   const addReward = useCallback(
@@ -179,16 +212,20 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const kidAge = ageFromDob(state.kidDob);
+
   const value = useMemo(
     () => ({
       ...state,
       ready,
+      kidAge,
       startAdventure,
+      setKidProfile,
       addReward,
       completeDailyTask,
       resetDailyIfNeeded,
     }),
-    [state, ready, startAdventure, addReward, completeDailyTask, resetDailyIfNeeded],
+    [state, ready, kidAge, startAdventure, setKidProfile, addReward, completeDailyTask, resetDailyIfNeeded],
   );
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;

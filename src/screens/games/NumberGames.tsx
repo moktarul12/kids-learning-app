@@ -7,41 +7,148 @@ import { LivingIcon } from '../../components/KidAnimations';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { useGameSession, randInt, shuffle } from '../../hooks/useGameSession';
-import { speak } from '../../services/voice';
+import { speak, greetKid } from '../../services/voice';
 
 export function NumberIntroScreen({ navigation }: RootStackProps<'NumberIntro'>) {
   const [n, setN] = useState(1);
-  const prompt = `Number ${n}`;
   const { showReward, celebrate, playNext, streak, round } = useGameSession({
     gameId: 'number_intro',
     skill: 'numbers',
-    prompt,
   });
-  useEffect(() => setN(1), [round]);
+
+  useEffect(() => {
+    setN(1);
+  }, [round]);
+
+  useEffect(() => {
+    if (n === 1) {
+      greetKid('numbers');
+      const t = setTimeout(() => speak(`Number ${n}`), 900);
+      return () => clearTimeout(t);
+    }
+    speak(`Number ${n}`);
+  }, [n, round]);
+
+  const tens = Math.floor(n / 10);
+  const ones = n % 10;
+  const decadeStart = Math.floor((n - 1) / 10) * 10 + 1;
+  const decadeEnd = Math.min(decadeStart + 9, 100);
+
+  const go = (next: number) => {
+    const clamped = Math.max(1, Math.min(100, next));
+    if (clamped === 100 && n === 100) {
+      celebrate();
+      return;
+    }
+    setN(clamped);
+    if (clamped === 100) {
+      setTimeout(() => celebrate(), 600);
+    }
+  };
 
   return (
     <GameShell
       title="Meet Numbers"
-      prompt={prompt}
+      prompt={`Number ${n}`}
       promptEmoji="🔢"
       round={round}
+      progressCurrent={n}
+      progressTotal={100}
       onBack={() => navigation.goBack()}
       backLabel="Number World"
       backEmoji="🔢"
       showReward={showReward}
       onNext={playNext}
       streak={streak}
+      rewardMessage="You met 100!"
     >
-      <LivingIcon motion="pulse">
-        <Text style={styles.mega}>{n}</Text>
-      </LivingIcon>
-      <Text style={styles.stars}>{'⭐'.repeat(n)}</Text>
-      <BigButton
-        label={n < 10 ? 'Next' : 'Finish'}
-        onPress={() => (n < 10 ? setN(n + 1) : celebrate())}
-        color={colors.blue}
-        textColor="#FFF"
-      />
+      <Text style={styles.meetDecade}>
+        Exploring {decadeStart}–{decadeEnd}
+      </Text>
+
+      <Pressable onPress={() => speak(`Number ${n}`)} style={styles.meetHero}>
+        <LivingIcon motion="pulse">
+          <Text style={[styles.mega, n >= 100 && { fontSize: 72 }]}>{n}</Text>
+        </LivingIcon>
+      </Pressable>
+
+      {/* Visual: dots for small, tens groups for larger */}
+      {n <= 20 ? (
+        <View style={styles.meetDots}>
+          {Array.from({ length: n }).map((_, i) => (
+            <Text key={i} style={styles.meetDot}>
+              {['⭐', '🔵', '🟡', '🟢'][i % 4]}
+            </Text>
+          ))}
+        </View>
+      ) : (
+        <View style={styles.meetTensBox}>
+          <Text style={styles.meetTensLabel}>
+            {tens > 0 ? `${tens} ten${tens > 1 ? 's' : ''}` : ''}
+            {tens > 0 && ones > 0 ? ' + ' : ''}
+            {ones > 0 ? `${ones}` : tens === 0 ? '0' : ''}
+          </Text>
+          <View style={styles.meetTensRow}>
+            {Array.from({ length: tens }).map((_, i) => (
+              <View key={`t-${i}`} style={styles.meetTenBar}>
+                <Text style={styles.meetTenBarText}>10</Text>
+              </View>
+            ))}
+            {Array.from({ length: ones }).map((_, i) => (
+              <View key={`o-${i}`} style={styles.meetOneDot} />
+            ))}
+          </View>
+        </View>
+      )}
+
+      <View style={styles.meetNav}>
+        <Pressable
+          onPress={() => go(n - 1)}
+          disabled={n <= 1}
+          style={[styles.meetNavBtn, n <= 1 && { opacity: 0.35 }]}
+        >
+          <Text style={styles.meetNavBtnText}>◀</Text>
+        </Pressable>
+        <Pressable onPress={() => go(n - 10)} disabled={n <= 1} style={[styles.meetJump, n <= 1 && { opacity: 0.35 }]}>
+          <Text style={styles.meetJumpText}>-10</Text>
+        </Pressable>
+        <Pressable onPress={() => go(n + 10)} disabled={n >= 100} style={[styles.meetJump, n >= 100 && { opacity: 0.35 }]}>
+          <Text style={styles.meetJumpText}>+10</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => go(n + 1)}
+          disabled={n >= 100}
+          style={[styles.meetNavBtn, styles.meetNavBtnPrimary, n >= 100 && { opacity: 0.35 }]}
+        >
+          <Text style={[styles.meetNavBtnText, { color: '#FFF' }]}>▶</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.meetDecadeStrip}>
+        {[1, 11, 21, 31, 41, 51, 61, 71, 81, 91].map((start) => {
+          const on = n >= start && n < start + 10;
+          return (
+            <Pressable
+              key={start}
+              onPress={() => go(start)}
+              style={[styles.meetDecadeChip, on && styles.meetDecadeChipOn]}
+            >
+              <Text style={[styles.meetDecadeChipText, on && { color: '#FFF' }]}>{start}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {n >= 100 ? (
+        <BigButton label="Finish!" onPress={() => celebrate()} color={colors.yellow} />
+      ) : (
+        <BigButton
+          label={n % 10 === 0 ? `Yay! On to ${n + 1}` : 'Next number'}
+          onPress={() => go(n + 1)}
+          color={colors.blue}
+          textColor="#FFF"
+        />
+      )}
     </GameShell>
   );
 }
@@ -978,6 +1085,114 @@ export function MoreLessScreen({ navigation }: RootStackProps<'MoreLess'>) {
 const styles = StyleSheet.create({
   mega: { ...typography.mega, color: colors.blue },
   stars: { fontSize: 28, letterSpacing: 4 },
+  meetDecade: {
+    ...typography.kidLabel,
+    fontSize: 14,
+    color: colors.inkMuted,
+    textAlign: 'center',
+  },
+  meetHero: { alignItems: 'center', paddingVertical: 4 },
+  meetDots: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 4,
+    maxWidth: 280,
+    minHeight: 40,
+  },
+  meetDot: { fontSize: 22 },
+  meetTensBox: {
+    backgroundColor: '#E8F4FF',
+    borderRadius: 18,
+    padding: 12,
+    borderWidth: 2,
+    borderColor: '#A8D4F0',
+    width: '100%',
+    maxWidth: 320,
+    gap: 8,
+  },
+  meetTensLabel: {
+    ...typography.title,
+    fontSize: 16,
+    textAlign: 'center',
+    color: colors.ink,
+  },
+  meetTensRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  meetTenBar: {
+    backgroundColor: colors.blue,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+  },
+  meetTenBarText: { color: '#FFF', fontFamily: 'Fredoka_700Bold', fontSize: 12 },
+  meetOneDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.yellow,
+    borderWidth: 2,
+    borderColor: '#F5C518',
+  },
+  meetNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+  },
+  meetNavBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#EEF3F8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#D7E6F7',
+  },
+  meetNavBtnPrimary: {
+    backgroundColor: colors.blue,
+    borderColor: colors.blue,
+  },
+  meetNavBtnText: { fontSize: 22, color: colors.ink, fontWeight: '800' },
+  meetJump: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 14,
+    backgroundColor: '#FFF8EE',
+    borderWidth: 2,
+    borderColor: '#FFE08A',
+  },
+  meetJumpText: { fontFamily: 'Fredoka_700Bold', fontSize: 14, color: colors.ink },
+  meetDecadeStrip: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    justifyContent: 'center',
+    maxWidth: 340,
+  },
+  meetDecadeChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: '#F3F8FF',
+    borderWidth: 1.5,
+    borderColor: '#D7E6F7',
+  },
+  meetDecadeChipOn: {
+    backgroundColor: colors.blue,
+    borderColor: colors.blue,
+  },
+  meetDecadeChipText: {
+    fontFamily: 'Fredoka_700Bold',
+    fontSize: 11,
+    color: colors.inkMuted,
+  },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' },
   beforeStage: {

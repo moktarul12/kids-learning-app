@@ -130,11 +130,18 @@ export function AppHeader({
         <Image source={require('../../assets/logo.png')} style={styles.avatarLogo} resizeMode="cover" />
       </View>
     ) : showBack ? (
-      <IconButton
-        image={require('../../assets/icons/back_arrow.png')}
+      <Pressable
         onPress={goBack}
-        accessibilityLabel="Back"
-      />
+        accessibilityLabel="Go back"
+        hitSlop={8}
+        style={({ pressed }) => [
+          styles.backPill,
+          { transform: [{ scale: pressed ? 0.94 : 1 }], opacity: pressed ? 0.9 : 1 },
+        ]}
+      >
+        <Text style={styles.backPillChevron}>◀</Text>
+        <Text style={styles.backPillText}>Back</Text>
+      </Pressable>
     ) : (
       <View style={styles.headerSide} />
     );
@@ -405,6 +412,31 @@ const styles = StyleSheet.create({
   },
   iconBtnText: { fontSize: 22, color: colors.white },
   iconBtnImage: { width: 52, height: 52 },
+  backPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFD93D',
+    paddingLeft: 12,
+    paddingRight: 14,
+    paddingVertical: 10,
+    borderRadius: 22,
+    borderWidth: 3,
+    borderColor: '#F5C518',
+    minWidth: 88,
+    ...shadows.soft,
+  },
+  backPillChevron: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#1E2A3A',
+    marginTop: 1,
+  },
+  backPillText: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: '#1E2A3A',
+  },
 
   rewards: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   pill: {

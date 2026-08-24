@@ -3,7 +3,7 @@ import { Animated, StyleSheet, Text, View } from 'react-native';
 import { ConfettiBurst, LivingIcon } from './KidAnimations';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
-import { speak } from '../services/voice';
+import { cheerKid } from '../services/voice';
 import { playSuccessFanfare } from '../services/sound';
 
 type Props = {
@@ -41,7 +41,7 @@ export function RewardModal({
     Animated.spring(pop, { toValue: 1, friction: 5, useNativeDriver: true }).start();
     playSuccessFanfare().catch(() => {});
     const voiceT = setTimeout(() => {
-      speak(display.replace(/!+$/, '') || 'Congratulations');
+      cheerKid();
     }, 320);
     const t = setTimeout(() => nextRef.current(), 1900);
     return () => {

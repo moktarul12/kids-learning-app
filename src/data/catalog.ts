@@ -34,7 +34,7 @@ export const GAMES: GameDef[] = [
   { id: 'sort_color', title: 'Color Sort', emoji: '🧺', world: 'color', route: 'SortColor', blurb: 'Fill the baskets', kind: 'quiz' },
   { id: 'match_color', title: 'Color Match', emoji: '🎯', world: 'color', route: 'MatchColor', blurb: 'Pair dots & things', kind: 'quiz' },
   // Number
-  { id: 'number_intro', title: 'Meet Numbers', emoji: '1️⃣', world: 'number', route: 'NumberIntro', blurb: 'Big friendly digits', kind: 'learn' },
+  { id: 'number_intro', title: 'Meet Numbers', emoji: '1️⃣', world: 'number', route: 'NumberIntro', blurb: 'Count to 100', kind: 'learn' },
   { id: 'count_objects', title: 'Count', emoji: '🍎', world: 'number', route: 'CountObjects', blurb: 'How many?', kind: 'learn' },
   { id: 'number_train', title: 'Number Train', emoji: '🚂', world: 'number', route: 'NumberTrain', blurb: 'Fix the coaches', kind: 'learn' },
   { id: 'count_collect', title: 'Feed Monster', emoji: '👾', world: 'number', route: 'CountCollect', blurb: 'Give the right amount', kind: 'quiz' },
@@ -53,9 +53,9 @@ export const GAMES: GameDef[] = [
   { id: 'odd_one', title: 'Odd One Out', emoji: '🔍', world: 'thinking', route: 'OddOneOut', blurb: 'Find the different', kind: 'quiz' },
   { id: 'sort_category', title: 'Sort It', emoji: '📦', world: 'thinking', route: 'SortCategory', blurb: 'Put things away', kind: 'quiz' },
   // Creative + story — learning play
-  { id: 'coloring', title: 'Coloring', emoji: '🎨', world: 'creative', route: 'Coloring', blurb: 'Paint fun pictures', kind: 'learn' },
-  { id: 'my_world', title: 'My World', emoji: '🌍', world: 'creative', route: 'MyWorldCreator', blurb: 'Stamp a scene', kind: 'learn' },
-  { id: 'story_bunny', title: 'Bunny Story', emoji: '🐰', world: 'story', route: 'StoryPlay', blurb: 'Choose & learn', kind: 'learn' },
+  { id: 'coloring', title: 'Paint Party', emoji: '🎨', world: 'creative', route: 'Coloring', blurb: 'Paint a friend', kind: 'learn' },
+  { id: 'my_world', title: 'My Day', emoji: '🌍', world: 'creative', route: 'MyWorldCreator', blurb: 'Build your day', kind: 'learn' },
+  { id: 'story_bunny', title: 'Story Time', emoji: '📚', world: 'story', route: 'StoryPlay', blurb: 'Pick & play a tale', kind: 'learn' },
 ];
 
 export function gamesForWorld(worldId: WorldId) {

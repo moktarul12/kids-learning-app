@@ -15,9 +15,9 @@ type Props = CompositeScreenProps<
 >;
 
 const OPTIONS = [
-  { title: 'Coloring', emoji: '🎨', route: 'Coloring' as const, color: '#FF7AB8', blurb: 'Paint fun pictures' },
+  { title: 'Coloring', emoji: '🎨', route: 'Coloring' as const, color: '#FF7AB8', blurb: 'Paint Party!' },
   { title: 'Shape Builder', emoji: '🏠', route: 'ShapeBuilder' as const, color: '#4DA3FF', blurb: 'Finish the picture' },
-  { title: 'My World', emoji: '🌎', route: 'MyWorldCreator' as const, color: '#7ED957', blurb: 'Stamp a scene' },
+  { title: 'My World', emoji: '🌎', route: 'MyWorldCreator' as const, color: '#7ED957', blurb: 'Build your day' },
 ];
 
 export function CreateScreen({ navigation }: Props) {
