@@ -130,6 +130,12 @@ export function MyWorldScreen({ navigation }: Props) {
                   <Text style={[styles.cardTitle, { color: w.tint }]}>{w.label}</Text>
                   <Text style={styles.cardBlurb}>{w.blurb}</Text>
                 </View>
+                <View style={styles.goArrowWrap} pointerEvents="none">
+                  <View style={[styles.goGlow, { backgroundColor: w.tint }]} />
+                  {/* white outline for contrast on any card */}
+                  <View style={[styles.goChev, styles.goChevOutline]} />
+                  <View style={[styles.goChev, { borderColor: w.tint }]} />
+                </View>
               </Pressable>
             ))}
           </View>
@@ -200,6 +206,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   /** Text sits in the clear lower half of each portal art */
+  /** Text sits in the clear lower half of each portal art */
   cardCopy: {
     position: 'absolute',
     left: '10%',
@@ -223,5 +230,41 @@ const styles = StyleSheet.create({
     marginTop: 3,
     lineHeight: 15,
     includeFontPadding: false,
+  },
+  goArrowWrap: {
+    position: 'absolute',
+    right: 12,
+    bottom: 10,
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  goGlow: {
+    position: 'absolute',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    opacity: 0.2,
+  },
+  goChev: {
+    width: 14,
+    height: 14,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#FFFFFF',
+    transform: [{ rotate: '45deg' }],
+    marginLeft: -3,
+  },
+  goChevOutline: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderTopWidth: 6,
+    borderRightWidth: 6,
+    borderColor: 'rgba(255,255,255,0.95)',
+    transform: [{ rotate: '45deg' }],
+    marginLeft: -3,
   },
 });
