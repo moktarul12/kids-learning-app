@@ -6,6 +6,15 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      build_playstore_aab:
+        description: 'Also build signed AAB for Google Play'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 concurrency:
   group: android-apk-${{ github.ref }}
@@ -13,7 +22,7 @@ concurrency:
 
 jobs:
   build-apk:
-    name: Expo → Android APK
+    name: Expo Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -45,8 +54,6 @@ jobs:
       - name: Use debug keystore for CI release APK
         working-directory: android/app
         run: |
-          # Expo release builds need a signingConfig; for CI artifacts use the
-          # Android debug keystore so the APK installs without extra secrets.
           python3 <<'PY'
           from pathlib import Path
           path = Path("build.gradle")
@@ -61,9 +68,9 @@ jobs:
               )
               if n:
                   path.write_text(text2)
-                  print("Patched release signingConfig → debug")
+                  print("Patched release signingConfig -> debug")
               else:
-                  print("WARNING: could not patch release signing; trying assembleDebug fallback later")
+                  print("WARNING: could not patch release signing")
           else:
               print("Release already uses debug signingConfig")
           PY
@@ -75,7 +82,6 @@ jobs:
           ./gradlew assembleRelease --no-daemon
 
       - name: Locate APK
-        id: apk
         run: |
           APK=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
           if [ -z "$APK" ]; then
@@ -84,7 +90,6 @@ jobs:
             exit 1
           fi
           cp "$APK" kids-learning-app.apk
-          echo "path=kids-learning-app.apk" >> "$GITHUB_OUTPUT"
           ls -lh kids-learning-app.apk
 
       - name: Upload APK artifact
@@ -94,3 +99,121 @@ jobs:
           path: kids-learning-app.apk
           if-no-files-found: error
           retention-days: 30
+
+  build-playstore-aab:
+    name: Signed AAB for Play Store
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.build_playstore_aab == 'true')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Prebuild native Android project
+        run: npx expo prebuild --platform android --non-interactive --clean
+
+      - name: Decode release keystore
+        run: |
+          if [ -z "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
+            echo "Missing secret RELEASE_KEYSTORE_BASE64"
+            exit 1
+          fi
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+          ls -lh android/app/release.keystore
+
+      - name: Configure Play Store release signing
+        working-directory: android/app
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("build.gradle")
+          text = path.read_text()
+
+          release_cfg = """
+        release {
+            storeFile file("release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+"""
+
+          if "storeFile file(\"release.keystore\")" not in text:
+              text = text.replace(
+                  "signingConfigs {\n        debug {",
+                  "signingConfigs {\n" + release_cfg + "        debug {",
+                  1,
+              )
+
+          text = text.replace(
+              "signingConfig signingConfigs.debug",
+              "signingConfig signingConfigs.release",
+          )
+          # keep debug buildType on debug keystore
+          text = re.sub(
+              r"(buildTypes\s*\{\s*debug\s*\{[^}]*signingConfig\s+)signingConfigs\.release",
+              r"\1signingConfigs.debug",
+              text,
+              count=1,
+              flags=re.S,
+          )
+
+          path.write_text(text)
+          print("Configured Play Store release signing")
+          PY
+
+      - name: Build signed AAB
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "Missing KEYSTORE_PASSWORD / KEY_ALIAS / KEY_PASSWORD secrets"
+            exit 1
+          fi
+          chmod +x gradlew
+          ./gradlew bundleRelease --no-daemon
+
+      - name: Locate AAB
+        run: |
+          AAB=$(find android/app/build/outputs/bundle -name "*.aab" | head -n 1)
+          if [ -z "$AAB" ]; then
+            echo "No AAB found"
+            find android/app/build/outputs -type f || true
+            exit 1
+          fi
+          cp "$AAB" kiddo-release.aab
+          ls -lh kiddo-release.aab
+
+      - name: Upload Play Store AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiddo-playstore-aab
+          path: kiddo-release.aab
+          if-no-files-found: error
+          retention-days: 90
