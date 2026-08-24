@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   build-signed:
-    name: Signed APK + AAB
+    name: Signed APK and AAB
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -59,42 +59,35 @@ jobs:
           path = Path("build.gradle")
           text = path.read_text()
 
-          release_cfg = """
-        release {
-            storeFile file("release.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
-        }
-"""
+          release_cfg = (
+              "\n        release {\n"
+              "            storeFile file(\"release.keystore\")\n"
+              "            storePassword System.getenv(\"KEYSTORE_PASSWORD\")\n"
+              "            keyAlias System.getenv(\"KEY_ALIAS\")\n"
+              "            keyPassword System.getenv(\"KEY_PASSWORD\")\n"
+              "        }\n"
+          )
 
           if 'storeFile file("release.keystore")' not in text:
               text = text.replace(
                   "signingConfigs {\n        debug {",
-                  "signingConfigs {\n" + release_cfg + "        debug {",
+                  "signingConfigs {" + release_cfg + "        debug {",
                   1,
               )
 
-          # Point release buildType at release keystore
-          text = re.sub(
-              r"(buildTypes\s*\{\s*debug\s*\{[\s\S]*?\}\s*release\s*\{[\s\S]*?signingConfig\s+)signingConfigs\.debug",
-              r"\1signingConfigs.release",
+          text2, n = re.subn(
+              r"(release\s*\{[\s\S]*?)signingConfig signingConfigs\.debug",
+              r"\1signingConfig signingConfigs.release",
               text,
               count=1,
           )
-          # Fallback if Expo template uses only release signingConfig debug
-          if "signingConfig signingConfigs.release" not in text:
-              text = re.sub(
-                  r"(release\s*\{[\s\S]*?)signingConfig signingConfigs\.debug",
-                  r"\1signingConfig signingConfigs.release",
-                  text,
-                  count=1,
-              )
+          if n:
+              text = text2
+          elif "signingConfig signingConfigs.release" not in text:
+              raise SystemExit("Could not set release signingConfig")
 
           path.write_text(text)
           print("Configured release signing for APK + AAB")
-          if "signingConfigs.release" not in text and "signingConfig signingConfigs.release" not in text:
-              raise SystemExit("Failed to wire signingConfigs.release")
           PY
 
       - name: Build signed APK and AAB
