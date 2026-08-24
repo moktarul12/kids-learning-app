@@ -104,6 +104,7 @@ export function AppHeader({
   title,
   subtitle,
   titleEmoji,
+  titleImage,
   left = 'avatar',
   right = 'none',
   backTo,
@@ -113,6 +114,8 @@ export function AppHeader({
   title: string;
   subtitle?: string;
   titleEmoji?: string;
+  /** Optional title graphic (e.g. MY WORLD badge) — hub header only */
+  titleImage?: ImageSourcePropType;
   left?: HeaderLeft;
   right?: HeaderRight;
   /** Previous place — drives the back button only */
@@ -168,9 +171,18 @@ export function AppHeader({
         <View style={styles.appHeaderRow}>
           {leftSlot}
           <View style={styles.appHeaderMid}>
-            <Text style={[styles.appHeaderTitle, styles.appHeaderTitleCenter]} numberOfLines={2}>
-              {title}
-            </Text>
+            {titleImage ? (
+              <Image
+                source={titleImage}
+                style={styles.appHeaderTitleImage}
+                resizeMode="contain"
+                accessibilityLabel={title}
+              />
+            ) : (
+              <Text style={[styles.appHeaderTitle, styles.appHeaderTitleCenter]} numberOfLines={2}>
+                {title}
+              </Text>
+            )}
             {subtitle ? <Text style={styles.appHeaderSub}>{subtitle}</Text> : null}
           </View>
           {rightSlot}
@@ -525,7 +537,7 @@ const styles = StyleSheet.create({
   appHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 52,
+    minHeight: 64,
   },
   appHeaderSpacer: { flex: 1 },
   // legacy alias kept for any leftover refs
@@ -538,8 +550,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   headerSide: {
-    width: 52,
-    height: 52,
+    width: 62,
+    height: 62,
   },
   headerSideWide: {
     width: 132,
@@ -550,9 +562,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
@@ -561,7 +573,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...shadows.soft,
   },
-  avatarLogo: { width: 48, height: 48 },
+  avatarLogo: { width: 62, height: 62 },
   titleBanner: {
     width: '100%',
   },
@@ -611,6 +623,10 @@ const styles = StyleSheet.create({
   appHeaderTitleCenter: {
     textAlign: 'center',
     fontSize: 22,
+  },
+  appHeaderTitleImage: {
+    width: 196,
+    height: 96,
   },
   roundChip: {
     alignSelf: 'flex-start',

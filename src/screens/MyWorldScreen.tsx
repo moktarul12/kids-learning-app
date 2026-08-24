@@ -13,12 +13,13 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppShell, AppHeader } from '../components/ui';
-import { LivingIcon, IconMotion } from '../components/KidAnimations';
 import { BACKGROUNDS } from '../data/colorActivities';
-import { WORLDS as WORLD_META } from '../data/catalog';
 import { MainTabParamList, RootStackParamList } from '../navigation/types';
-import { colors, fonts, radii, shadows } from '../theme';
+import { fonts } from '../theme';
 import type { WorldId } from '../data/catalog';
+
+const HEADER_BANNER = require('../../assets/home/header_banner.png');
+const MY_WORLD_TITLE = require('../../assets/home/my_world_title.png');
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'World'>,
@@ -29,90 +30,85 @@ const WORLDS: {
   id: WorldId;
   label: string;
   blurb: string;
-  icon: ImageSourcePropType;
-  motion: IconMotion;
   tint: string;
+  art: ImageSourcePropType;
 }[] = [
   {
     id: 'color',
-    label: 'Color World',
-    blurb: 'Paint & find',
-    icon: require('../../assets/home/icon-color-world.png'),
-    motion: 'bob',
-    tint: '#FF5A5A',
+    label: 'Color',
+    blurb: 'Paint & find colors',
+    tint: '#E8890C',
+    art: require('../../assets/home/portal_color.png'),
   },
   {
     id: 'number',
-    label: 'Number World',
+    label: 'Number',
     blurb: 'Count & play',
-    icon: require('../../assets/home/icon-number-world.png'),
-    motion: 'tilt',
-    tint: '#4BA3FF',
+    tint: '#2F7FE8',
+    art: require('../../assets/home/portal_number.png'),
   },
   {
     id: 'shape',
-    label: 'Shape World',
-    blurb: 'Build & spot',
-    icon: require('../../assets/home/icon-shape-world.png'),
-    motion: 'pulse',
-    tint: '#5ECF5A',
+    label: 'Shape',
+    blurb: 'Build & spot shapes',
+    tint: '#2FA84A',
+    art: require('../../assets/home/portal_shape.png'),
   },
   {
     id: 'thinking',
-    label: 'Thinking World',
-    blurb: 'Fun puzzles',
-    icon: require('../../assets/home/icon-thinking-world.png'),
-    motion: 'glow',
-    tint: '#FFD93D',
+    label: 'Thinking',
+    blurb: 'Solve fun puzzles',
+    tint: '#7B4FE8',
+    art: require('../../assets/home/portal_thinking.png'),
   },
   {
     id: 'creative',
-    label: 'Creative World',
-    blurb: 'Make art',
-    icon: require('../../assets/home/icon-creative-world.png'),
-    motion: 'sway',
-    tint: '#FF9A3C',
+    label: 'Creative',
+    blurb: 'Make something new',
+    tint: '#E84A9A',
+    art: require('../../assets/home/portal_creative.png'),
   },
   {
     id: 'story',
-    label: 'Good Habits',
-    blurb: 'Brush, sleep & more',
-    icon: require('../../assets/home/icon-story-world.png'),
-    motion: 'bob',
-    tint: '#9B7BFF',
+    label: 'Story',
+    blurb: 'Choose your path',
+    tint: '#1EAEB8',
+    art: require('../../assets/home/portal_story.png'),
   },
 ];
 
-/** MY WORLD — big portal cards */
+/** MY WORLD — vertical portal cards matching attached UX */
 export function MyWorldScreen({ navigation }: Props) {
   const { width } = useWindowDimensions();
-  const gap = 14;
-  const padH = 16;
-  const cols = 2;
-  const tileW = (Math.min(width, 480) - padH * 2 - gap * (cols - 1)) / cols;
-  const tileH = Math.max(tileW * 1.22, 168);
+  const gap = 12;
+  const padH = 14;
+  const tileW = (Math.min(width, 480) - padH * 2 - gap) / 2;
+  const tileH = tileW * (495 / 455);
 
   return (
     <AppShell background={BACKGROUNDS.myWorld}>
-      <AppHeader title="MY WORLD" left="avatar" right="none" />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scroll, { paddingHorizontal: padH }]}
+        contentContainerStyle={styles.scroll}
+        bounces
       >
-        <View style={styles.welcome}>
-          <Text style={styles.welcomeEmoji}>🌈</Text>
-          <View style={styles.welcomeCopy}>
-            <Text style={styles.welcomeTitle}>Pick a world!</Text>
-            <Text style={styles.welcomeSub}>Tap a door to start learning</Text>
-          </View>
-        </View>
+        <AppHeader title="MY WORLD" titleImage={MY_WORLD_TITLE} left="avatar" right="none" />
 
-        <View style={[styles.grid, { columnGap: gap, rowGap: gap }]}>
-          {WORLDS.map((w) => {
-            const meta = WORLD_META.find((m) => m.id === w.id);
-            return (
+        <View style={{ paddingHorizontal: padH }}>
+          <View style={styles.banner}>
+            <Image source={HEADER_BANNER} style={styles.bannerImg} resizeMode="contain" />
+            <View style={styles.bannerCopy} pointerEvents="none">
+              <Text style={styles.bannerTitle}>Pick a world!</Text>
+              <Text style={styles.bannerSub}>Tap a door to start learning</Text>
+            </View>
+          </View>
+
+          <View style={[styles.grid, { columnGap: gap, rowGap: gap }]}>
+            {WORLDS.map((w) => (
               <Pressable
                 key={w.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${w.label}. ${w.blurb}`}
                 onPress={() => {
                   if (w.id === 'story') {
                     navigation.navigate('StoryPlay');
@@ -121,33 +117,22 @@ export function MyWorldScreen({ navigation }: Props) {
                   }
                 }}
                 style={({ pressed }) => [
-                  styles.portal,
-                  shadows.card,
+                  styles.card,
                   {
                     width: tileW,
                     height: tileH,
-                    borderColor: w.tint + '55',
-                    transform: [{ scale: pressed ? 0.96 : 1 }],
+                    transform: [{ scale: pressed ? 0.97 : 1 }],
                   },
                 ]}
               >
-                <View style={[styles.portalGlow, { backgroundColor: w.tint + '22' }]}>
-                  <LivingIcon motion={w.motion} style={styles.portalIconWrap}>
-                    <Image source={w.icon} style={styles.portalIcon} resizeMode="contain" />
-                  </LivingIcon>
-                </View>
-                <Text style={styles.portalLabel} numberOfLines={1}>
-                  {w.label.replace(' World', '')}
-                </Text>
-                <Text style={styles.portalBlurb} numberOfLines={1}>
-                  {meta?.subtitle ?? w.blurb}
-                </Text>
-                <View style={[styles.portalGo, { backgroundColor: w.tint }]}>
-                  <Text style={styles.portalGoText}>›</Text>
+                <Image source={w.art} style={styles.cardArt} resizeMode="contain" />
+                <View style={styles.cardCopy} pointerEvents="none">
+                  <Text style={[styles.cardTitle, { color: w.tint }]}>{w.label}</Text>
+                  <Text style={styles.cardBlurb}>{w.blurb}</Text>
                 </View>
               </Pressable>
-            );
-          })}
+            ))}
+          </View>
         </View>
       </ScrollView>
     </AppShell>
@@ -156,32 +141,46 @@ export function MyWorldScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   scroll: {
-    paddingBottom: 28,
-    paddingTop: 4,
+    paddingBottom: 36,
+    paddingTop: 0,
+    flexGrow: 1,
   },
-  welcome: {
-    flexDirection: 'row',
+  banner: {
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
+    aspectRatio: 590 / 270,
+    marginBottom: 12,
+    position: 'relative',
+  },
+  bannerImg: {
+    ...StyleSheet.absoluteFill,
+    width: '100%',
+    height: '100%',
+  },
+  bannerCopy: {
+    position: 'absolute',
+    left: '36%',
+    right: '8%',
+    top: '32%',
+    height: '38%',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: 'rgba(255,255,255,0.88)',
-    borderRadius: radii.card,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginBottom: 14,
-    ...shadows.soft,
   },
-  welcomeEmoji: { fontSize: 32 },
-  welcomeCopy: { flex: 1 },
-  welcomeTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 20,
-    color: colors.darkText,
+  bannerTitle: {
+    fontFamily: fonts.headingAlt,
+    fontSize: 22,
+    color: '#4A2E14',
+    textAlign: 'center',
+    includeFontPadding: false,
   },
-  welcomeSub: {
-    fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.secondaryText,
+  bannerSub: {
+    fontFamily: fonts.bodyAlt,
+    fontSize: 13,
+    color: '#6B4A2E',
+    textAlign: 'center',
     marginTop: 2,
+    includeFontPadding: false,
   },
   grid: {
     flexDirection: 'row',
@@ -191,61 +190,38 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 480,
   },
-  portal: {
-    backgroundColor: colors.white,
-    borderRadius: 28,
-    borderWidth: 3,
-    paddingTop: 12,
-    paddingBottom: 14,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    overflow: 'hidden',
+  card: {
+    backgroundColor: 'transparent',
+    overflow: 'visible',
   },
-  portalGlow: {
-    width: '92%',
-    flex: 1,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  portalIconWrap: {
+  cardArt: {
+    ...StyleSheet.absoluteFill,
     width: '100%',
     height: '100%',
-    alignItems: 'center',
+  },
+  /** Text sits in the clear lower half of each portal art */
+  cardCopy: {
+    position: 'absolute',
+    left: '10%',
+    right: '10%',
+    bottom: '10%',
+    height: '34%',
     justifyContent: 'center',
-  },
-  portalIcon: {
-    width: '100%',
-    height: '100%',
-    transform: [{ scale: 1.18 }],
-  },
-  portalLabel: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    color: colors.darkText,
-    textAlign: 'center',
-  },
-  portalBlurb: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.secondaryText,
-    textAlign: 'center',
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  portalGo: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  portalGoText: {
-    color: colors.white,
-    fontFamily: fonts.heading,
-    fontSize: 26,
-    lineHeight: 28,
-    marginLeft: 2,
+  cardTitle: {
+    fontFamily: fonts.headingAlt,
+    fontSize: 20,
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
+  cardBlurb: {
+    fontFamily: fonts.bodyAlt,
+    fontSize: 12,
+    color: '#4A5568',
+    textAlign: 'center',
+    marginTop: 3,
+    lineHeight: 15,
+    includeFontPadding: false,
   },
 });
