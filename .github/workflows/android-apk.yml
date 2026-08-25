@@ -54,40 +54,56 @@ jobs:
         run: |
           python3 <<'PY'
           from pathlib import Path
-          import re
 
           path = Path("build.gradle")
           text = path.read_text()
 
-          release_cfg = (
-              "\n        release {\n"
-              "            storeFile file(\"release.keystore\")\n"
-              "            storePassword System.getenv(\"KEYSTORE_PASSWORD\")\n"
-              "            keyAlias System.getenv(\"KEY_ALIAS\")\n"
-              "            keyPassword System.getenv(\"KEY_PASSWORD\")\n"
-              "        }\n"
-          )
-
           if 'storeFile file("release.keystore")' not in text:
-              text = text.replace(
-                  "signingConfigs {\n        debug {",
-                  "signingConfigs {" + release_cfg + "        debug {",
-                  1,
+              release_cfg = (
+                  "\n        release {\n"
+                  "            storeFile file(\"release.keystore\")\n"
+                  "            storePassword System.getenv(\"KEYSTORE_PASSWORD\")\n"
+                  "            keyAlias System.getenv(\"KEY_ALIAS\")\n"
+                  "            keyPassword System.getenv(\"KEY_PASSWORD\")\n"
+                  "        }\n"
               )
+              needle = "signingConfigs {\n        debug {"
+              if needle not in text:
+                  raise SystemExit("Could not find signingConfigs.debug block to patch")
+              text = text.replace(needle, "signingConfigs {" + release_cfg + "        debug {", 1)
 
-          text2, n = re.subn(
-              r"(release\s*\{[\s\S]*?)signingConfig signingConfigs\.debug",
-              r"\1signingConfig signingConfigs.release",
-              text,
-              count=1,
-          )
-          if n:
-              text = text2
-          elif "signingConfig signingConfigs.release" not in text:
-              raise SystemExit("Could not set release signingConfig")
+          # Patch ONLY buildTypes.release — never the first `release {` (signingConfigs)
+          # and never buildTypes.debug (that was the previous CI bug).
+          bt = text.find("buildTypes {")
+          if bt < 0:
+              raise SystemExit("Could not find buildTypes block")
+          rel = text.find("\n        release {", bt)
+          if rel < 0:
+              raise SystemExit("Could not find buildTypes.release block")
+          # Next sibling after release is usually packagingOptions; limit search window
+          window = text[rel : rel + 800]
+          old = "signingConfig signingConfigs.debug"
+          new = "signingConfig signingConfigs.release"
+          if old in window:
+              abs_idx = rel + window.index(old)
+              text = text[:abs_idx] + new + text[abs_idx + len(old) :]
+          elif new not in window:
+              raise SystemExit("Could not find signingConfig inside buildTypes.release")
+
+          # Final guards
+          bt_text = text[text.find("buildTypes {") :]
+          rel_start = bt_text.find("\n        release {")
+          rel_window = bt_text[rel_start : rel_start + 800]
+          if "signingConfig signingConfigs.debug" in rel_window:
+              raise SystemExit("buildTypes.release still uses signingConfigs.debug")
+          if "signingConfig signingConfigs.release" not in rel_window:
+              raise SystemExit("buildTypes.release missing signingConfigs.release")
 
           path.write_text(text)
           print("Configured release signing for APK + AAB")
+          start = text.find("signingConfigs {")
+          end = text.find("packagingOptions {", start)
+          print(text[start:end])
           PY
 
       - name: Build signed APK and AAB
@@ -103,6 +119,27 @@ jobs:
           fi
           chmod +x gradlew
           ./gradlew assembleRelease bundleRelease --no-daemon
+
+      - name: Verify release signing (reject debug key)
+        run: |
+          AAB=$(find android/app/build/outputs/bundle -name "*.aab" | head -n 1)
+          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
+          if [ -z "$AAB" ] || [ -z "$APK" ]; then
+            echo "Missing APK or AAB for verify"
+            exit 1
+          fi
+          # Unpack AAB universal APK signing cert via jarsigner -verify -verbose -certs on the APK
+          CERTS=$(jarsigner -verify -verbose -certs "$APK" 2>&1 || true)
+          echo "$CERTS" | head -n 80
+          if echo "$CERTS" | grep -qi "CN=Android Debug"; then
+            echo "ERROR: Artifact is still signed with the Android Debug certificate"
+            exit 1
+          fi
+          if ! echo "$CERTS" | grep -qi "jar verified"; then
+            echo "ERROR: jarsigner did not report jar verified"
+            exit 1
+          fi
+          echo "Release signing OK (not Android Debug)"
 
       - name: Collect artifacts
         run: |
