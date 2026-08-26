@@ -139,7 +139,8 @@ jobs:
             echo "ERROR: Artifact is still signed with the Android Debug certificate"
             exit 1
           fi
-          if ! grep -qi "Signer #1 certificate DN:" /tmp/apk-certs.txt; then
+          # Newer build-tools print "V2 Signer: certificate DN:"; older print "Signer #1 certificate DN:"
+          if ! grep -Eiq "certificate DN:|Signer #[0-9]+ certificate DN:" /tmp/apk-certs.txt; then
             echo "ERROR: Could not read signing certificate from APK"
             exit 1
           fi
