@@ -122,24 +122,29 @@ jobs:
 
       - name: Verify release signing (reject debug key)
         run: |
-          AAB=$(find android/app/build/outputs/bundle -name "*.aab" | head -n 1)
+          set -euo pipefail
           APK=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
-          if [ -z "$AAB" ] || [ -z "$APK" ]; then
+          AAB=$(find android/app/build/outputs/bundle -name "*.aab" | head -n 1)
+          if [ -z "${APK:-}" ] || [ -z "${AAB:-}" ]; then
             echo "Missing APK or AAB for verify"
+            find android/app/build/outputs -type f || true
             exit 1
           fi
-          # Unpack AAB universal APK signing cert via jarsigner -verify -verbose -certs on the APK
-          CERTS=$(jarsigner -verify -verbose -certs "$APK" 2>&1 || true)
-          echo "$CERTS" | head -n 80
-          if echo "$CERTS" | grep -qi "CN=Android Debug"; then
+          APKSIGNER=$(ls -1 "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+          echo "Using $APKSIGNER"
+          # Modern AGP signs with APK Signature Scheme v2/v3 (jarsigner reports "unsigned")
+          "$APKSIGNER" verify --verbose "$APK"
+          "$APKSIGNER" verify --print-certs "$APK" | tee /tmp/apk-certs.txt
+          if grep -qi "CN=Android Debug" /tmp/apk-certs.txt; then
             echo "ERROR: Artifact is still signed with the Android Debug certificate"
             exit 1
           fi
-          if ! echo "$CERTS" | grep -qi "jar verified"; then
-            echo "ERROR: jarsigner did not report jar verified"
+          if ! grep -qi "Signer #1 certificate DN:" /tmp/apk-certs.txt; then
+            echo "ERROR: Could not read signing certificate from APK"
             exit 1
           fi
           echo "Release signing OK (not Android Debug)"
+          ls -lh "$APK" "$AAB"
 
       - name: Collect artifacts
         run: |
