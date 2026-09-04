@@ -6,6 +6,7 @@ import { WhiteStage, PromptBanner } from './SkyBackground';
 import { ProgressBar } from './ProgressBar';
 import { RewardModal, FeedbackToast } from './RewardModal';
 import { HeaderBackTo } from './ui';
+import { FloatingDecor } from './KidAnimations';
 
 type Props = {
   title: string;
@@ -56,6 +57,7 @@ export function GameShell({
   return (
     <View style={styles.root}>
       <SoftParkBackground>
+        <FloatingDecor />
         <GameHeader
           title={title}
           titleEmoji={promptEmoji}

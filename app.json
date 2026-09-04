@@ -22,7 +22,7 @@
         "backgroundImage": "./assets/android-icon-background.png"
       },
       "package": "com.dromominds.kiddoo",
-      "versionCode": 7,
+      "versionCode": 8,
       "predictiveBackGestureEnabled": false
     },
     "web": {

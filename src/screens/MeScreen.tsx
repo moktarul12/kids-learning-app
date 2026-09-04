@@ -46,6 +46,8 @@ const ANDROID_PACKAGE = 'com.dromominds.kiddoo';
 const PLAY_STORE_WEB = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`;
 const PLAY_STORE_HINT =
   `Hey! Try Kiddo with me — Learn · Explore · Grow!\n${PLAY_STORE_WEB}`;
+const PRIVACY_POLICY_URL = 'https://moktarul12.github.io/privacy/kiddo/';
+const SUPPORT_EMAIL = 'admin@dromominds.com';
 
 export function MeScreen({ navigation }: Props) {
   const {
@@ -114,6 +116,18 @@ export function MeScreen({ navigation }: Props) {
   const openAbout = () => {
     speak('About us');
     Linking.openURL('https://dromominds.in').catch(() => {});
+  };
+
+  const openPrivacy = () => {
+    speak('Privacy policy');
+    Linking.openURL(PRIVACY_POLICY_URL).catch(() => {});
+  };
+
+  const reportConcern = () => {
+    speak('Contact us');
+    Linking.openURL(
+      `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Kiddo — report a concern')}`,
+    ).catch(() => {});
   };
 
   return (
@@ -223,6 +237,24 @@ export function MeScreen({ navigation }: Props) {
                 <Text style={styles.aboutText}>About Us</Text>
                 <Text style={styles.aboutUrl}>dromominds.in</Text>
               </View>
+            </Pressable>
+
+            <Pressable style={[styles.about, shadows.soft]} onPress={openPrivacy}>
+              <Text style={{ fontSize: 24 }}>🔒</Text>
+              <View style={styles.aboutCopy}>
+                <Text style={styles.aboutText}>Privacy policy</Text>
+                <Text style={styles.aboutUrl}>How we handle your data</Text>
+              </View>
+              <Text style={styles.rateGo}>›</Text>
+            </Pressable>
+
+            <Pressable style={[styles.about, shadows.soft]} onPress={reportConcern}>
+              <Text style={{ fontSize: 24 }}>✉️</Text>
+              <View style={styles.aboutCopy}>
+                <Text style={styles.aboutText}>Report a concern</Text>
+                <Text style={styles.aboutUrl}>Parents and caregivers — contact us</Text>
+              </View>
+              <Text style={styles.rateGo}>›</Text>
             </Pressable>
 
             <Pressable

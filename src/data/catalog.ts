@@ -21,10 +21,10 @@ export const WORLDS: {
   color: string;
   subtitle: string;
 }[] = [
-  { id: 'color', title: 'Color', emoji: '🌈', color: '#FF5A5A', subtitle: 'Paint & find colors' },
+  { id: 'color', title: 'Color', emoji: '🌈', color: '#FF5A5A', subtitle: 'Paint, pop & play' },
   { id: 'number', title: 'Number', emoji: '🔢', color: '#4BA3FF', subtitle: 'Count & play' },
   { id: 'shape', title: 'Shape', emoji: '🔶', color: '#5ECF5A', subtitle: 'Build & spot shapes' },
-  { id: 'thinking', title: 'Thinking', emoji: '🧠', color: '#FFD93D', subtitle: 'Solve fun puzzles' },
+  { id: 'thinking', title: 'Thinking', emoji: '🧠', color: '#FFD93D', subtitle: 'Race, puzzles & play' },
   { id: 'creative', title: 'Creative', emoji: '🎨', color: '#FF9A3C', subtitle: 'Build fun pictures' },
   { id: 'story', title: 'Good Habits', emoji: '🌟', color: '#9B7BFF', subtitle: 'Brush, sleep & more' },
 ];
@@ -35,6 +35,9 @@ export const GAMES: GameDef[] = [
   { id: 'find_color', title: 'Find Color', emoji: '👀', world: 'color', route: 'FindColor', blurb: 'Tap the right ones', kind: 'quiz' },
   { id: 'sort_color', title: 'Color Sort', emoji: '🧺', world: 'color', route: 'SortColor', blurb: 'Fill the baskets', kind: 'quiz' },
   { id: 'match_color', title: 'Color Match', emoji: '🎯', world: 'color', route: 'MatchColor', blurb: 'Pair dots & things', kind: 'quiz' },
+  { id: 'pop_red_balloon', title: 'Pop Red!', emoji: '🎈', world: 'color', route: 'PopRedBalloon', blurb: 'Pop moving red balloons', kind: 'quiz' },
+  { id: 'balloon_color_pop', title: 'Balloon Party', emoji: '🎉', world: 'color', route: 'BalloonColorPop', blurb: 'Pop the color shown', kind: 'quiz' },
+  { id: 'balloon_rise', title: 'Balloon Rise', emoji: '🚀', world: 'color', route: 'BalloonRise', blurb: 'Catch red before they fly', kind: 'quiz' },
   // Number
   { id: 'count_objects', title: 'Count', emoji: '🍎', world: 'number', route: 'CountObjects', blurb: 'How many?', kind: 'learn' },
   { id: 'number_train', title: 'Number Train', emoji: '🚂', world: 'number', route: 'NumberTrain', blurb: 'Fix the coaches', kind: 'learn' },
@@ -53,6 +56,8 @@ export const GAMES: GameDef[] = [
   { id: 'memory', title: 'Memory', emoji: '🧠', world: 'thinking', route: 'MemoryGame', blurb: 'Flip & remember', kind: 'quiz' },
   { id: 'odd_one', title: 'Odd One Out', emoji: '🔍', world: 'thinking', route: 'OddOneOut', blurb: 'Find the different', kind: 'quiz' },
   { id: 'sort_category', title: 'Sort It', emoji: '📦', world: 'thinking', route: 'SortCategory', blurb: 'Put things away', kind: 'quiz' },
+  { id: 'cartoon_race', title: 'Cartoon Race', emoji: '🏎️', world: 'thinking', route: 'CartoonRace', blurb: 'Dodge & collect stars', kind: 'quiz' },
+  { id: 'tap_sprint', title: 'Tap Sprint', emoji: '🏃', world: 'thinking', route: 'TapSprint', blurb: 'Tap GO to win!', kind: 'quiz' },
   // Creative — builder-style only (like Shape Builder)
   { id: 'create_shapes', title: 'Build a Picture', emoji: '🧱', world: 'creative', route: 'ShapeBuilder', blurb: 'Finish with shapes', kind: 'learn', params: { pack: 'shapes' } },
   { id: 'create_face', title: 'Happy Face', emoji: '😊', world: 'creative', route: 'ShapeBuilder', blurb: 'Build a smile', kind: 'learn', params: { pack: 'faces' } },

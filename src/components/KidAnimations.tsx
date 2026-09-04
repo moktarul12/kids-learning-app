@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View, ViewStyle, StyleProp } from 'react-native';
 
-export type IconMotion = 'bob' | 'glow' | 'sway' | 'pulse' | 'tilt' | 'none';
+export type IconMotion = 'bob' | 'glow' | 'sway' | 'pulse' | 'tilt' | 'cartoon' | 'none';
 
 /**
  * Subtle living motion for an icon only (apple bob, light glow…).
@@ -24,13 +24,13 @@ export function LivingIcon({
       Animated.sequence([
         Animated.timing(t, {
           toValue: 1,
-          duration: motion === 'glow' || motion === 'pulse' ? 1400 : 1800,
+          duration: motion === 'cartoon' ? 1200 : motion === 'glow' || motion === 'pulse' ? 1400 : 1800,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
         Animated.timing(t, {
           toValue: 0,
-          duration: motion === 'glow' || motion === 'pulse' ? 1400 : 1800,
+          duration: motion === 'cartoon' ? 1200 : motion === 'glow' || motion === 'pulse' ? 1400 : 1800,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
@@ -45,7 +45,13 @@ export function LivingIcon({
   }
 
   const transform =
-    motion === 'bob'
+    motion === 'cartoon'
+      ? [
+          { translateY: t.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, -8, -4] }) },
+          { scaleX: t.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.06, 0.96] }) },
+          { scaleY: t.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 0.94, 1.06] }) },
+        ]
+      : motion === 'bob'
       ? [{ translateY: t.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }) }]
       : motion === 'sway'
         ? [{ rotate: t.interpolate({ inputRange: [0, 1], outputRange: ['-6deg', '6deg'] }) }]

@@ -1,8 +1,39 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { CartoonDriftCloud } from './CartoonMotion';
 
-/** Soft sky + rainbow + rolling hills — matches new Color/My World UX board */
+function BobbingFlower({ left, bottom, color }: { left: `${number}%`; bottom: number; color: string }) {
+  const bob = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bob, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(bob, { toValue: 0, duration: 1400, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [bob]);
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.flower,
+        {
+          left,
+          bottom,
+          backgroundColor: color,
+          transform: [{ translateY: bob.interpolate({ inputRange: [0, 1], outputRange: [0, -4] }) }],
+        },
+      ]}
+    />
+  );
+}
+
+/** Soft sky + rainbow + rolling hills — cartoon movie background */
 export function SoftParkBackground({ children }: { children: React.ReactNode }) {
   return (
     <View style={styles.root}>
@@ -12,7 +43,10 @@ export function SoftParkBackground({ children }: { children: React.ReactNode }) 
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Soft rainbow behind content */}
+      <CartoonDriftCloud top="6%" start={-30} size={0.85} duration={22000} />
+      <CartoonDriftCloud top="14%" start={80} size={1.1} duration={28000} />
+      <CartoonDriftCloud top="22%" start={20} size={0.7} duration={18000} />
+
       <View style={styles.rainbowWrap} pointerEvents="none">
         {['#FF6B6B', '#FF9A3C', '#FFD93D', '#5ECF5A', '#4BA3FF', '#A78BFA'].map((c, i) => (
           <View
@@ -31,24 +65,13 @@ export function SoftParkBackground({ children }: { children: React.ReactNode }) 
         ))}
       </View>
 
-      {/* Rolling hills */}
       <View style={[styles.hill, styles.hillBack]} pointerEvents="none" />
       <View style={[styles.hill, styles.hillMid]} pointerEvents="none" />
       <View style={[styles.hill, styles.hillFront]} pointerEvents="none" />
 
-      {/* Tiny flowers (decorative only — never steal taps) */}
-      <View
-        pointerEvents="none"
-        style={[styles.flower, { left: '12%', bottom: 52, backgroundColor: '#FF8AB8' }]}
-      />
-      <View
-        pointerEvents="none"
-        style={[styles.flower, { left: '28%', bottom: 44, backgroundColor: '#FFD54F' }]}
-      />
-      <View
-        pointerEvents="none"
-        style={[styles.flower, { right: '18%', bottom: 48, backgroundColor: '#FF6B6B' }]}
-      />
+      <BobbingFlower left="12%" bottom={52} color="#FF8AB8" />
+      <BobbingFlower left="28%" bottom={44} color="#FFD54F" />
+      <BobbingFlower left="78%" bottom={48} color="#FF6B6B" />
 
       {children}
     </View>
@@ -75,10 +98,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     backgroundColor: 'transparent',
   },
-  hill: {
-    position: 'absolute',
-    borderRadius: 200,
-  },
+  hill: { position: 'absolute', borderRadius: 200 },
   hillBack: {
     bottom: -70,
     left: -100,

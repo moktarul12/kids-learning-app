@@ -47,6 +47,15 @@ import {
   DailyAdventureScreen,
   MysteryBoxScreen,
 } from '../screens/games/CreativeGames';
+import {
+  BalloonColorPopScreen,
+  BalloonRiseScreen,
+  PopRedBalloonScreen,
+} from '../screens/games/BalloonPopGames';
+import {
+  CartoonRaceScreen,
+  TapSprintScreen,
+} from '../screens/games/RacingGames';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -139,6 +148,9 @@ export function RootNavigator() {
         <Stack.Screen name="FindColor" component={FindColorScreen} />
         <Stack.Screen name="SortColor" component={SortColorScreen} />
         <Stack.Screen name="MatchColor" component={MatchColorScreen} />
+        <Stack.Screen name="PopRedBalloon" component={PopRedBalloonScreen} />
+        <Stack.Screen name="BalloonColorPop" component={BalloonColorPopScreen} />
+        <Stack.Screen name="BalloonRise" component={BalloonRiseScreen} />
         <Stack.Screen name="CountObjects" component={CountObjectsScreen} />
         <Stack.Screen name="CountCollect" component={CountCollectScreen} />
         <Stack.Screen name="BeforeAfter" component={BeforeAfterScreen} />
@@ -154,6 +166,8 @@ export function RootNavigator() {
         <Stack.Screen name="PatternGame" component={PatternGameScreen} />
         <Stack.Screen name="SequenceGame" component={SequenceGameScreen} />
         <Stack.Screen name="SortCategory" component={SortCategoryScreen} />
+        <Stack.Screen name="CartoonRace" component={CartoonRaceScreen} />
+        <Stack.Screen name="TapSprint" component={TapSprintScreen} />
         <Stack.Screen name="Coloring" component={ColoringScreen} />
         <Stack.Screen name="MyWorldCreator" component={MyWorldCreatorScreen} />
         <Stack.Screen name="StoryPlay" component={StoryPlayScreen} />

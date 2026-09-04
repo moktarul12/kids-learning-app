@@ -15,6 +15,9 @@ export type RootStackParamList = {
   FindColor: undefined;
   SortColor: undefined;
   MatchColor: undefined;
+  PopRedBalloon: undefined;
+  BalloonColorPop: undefined;
+  BalloonRise: undefined;
   CountObjects: undefined;
   CountCollect: undefined;
   BeforeAfter: undefined;
@@ -30,6 +33,8 @@ export type RootStackParamList = {
   PatternGame: undefined;
   SequenceGame: undefined;
   SortCategory: undefined;
+  CartoonRace: undefined;
+  TapSprint: undefined;
   Coloring: undefined;
   MyWorldCreator: undefined;
   StoryPlay: { habitId?: string } | undefined;
