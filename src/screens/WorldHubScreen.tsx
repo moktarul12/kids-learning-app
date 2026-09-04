@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { RootStackProps } from '../navigation/types';
 import { AppShell, AppHeader, ActivityCard, ContentStage } from '../components/ui';
-import { CreateBuilderList } from '../components/CreateBuilderList';
 import { GoodHabitList } from '../components/GoodHabitList';
 import { WORLDS, gamesByKind, GameDef, GameKind } from '../data/catalog';
 import { BACKGROUNDS } from '../data/colorActivities';
@@ -59,27 +58,6 @@ export function WorldHubScreen({ navigation, route }: RootStackProps<'WorldHub'>
     const inner = width - padH * 2 - zonePad * 2;
     return (inner - gap * (cols - 1)) / cols;
   };
-
-  if (world.id === 'creative') {
-    return (
-      <AppShell background={bg}>
-        <AppHeader
-          title="Creative World"
-          titleEmoji={world.emoji}
-          left="back"
-          backTo={{
-            label: 'Back',
-            onPress: () => navigation.goBack(),
-          }}
-        />
-        <View style={styles.builderBody}>
-          <ContentStage contentStyle={styles.builderScroll}>
-            <CreateBuilderList navigation={navigation} />
-          </ContentStage>
-        </View>
-      </AppShell>
-    );
-  }
 
   if (world.id === 'story') {
     return (

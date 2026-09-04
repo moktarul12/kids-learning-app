@@ -25,7 +25,7 @@ export const WORLDS: {
   { id: 'number', title: 'Number', emoji: '🔢', color: '#4BA3FF', subtitle: 'Count & play' },
   { id: 'shape', title: 'Shape', emoji: '🔶', color: '#5ECF5A', subtitle: 'Build & spot shapes' },
   { id: 'thinking', title: 'Thinking', emoji: '🧠', color: '#FFD93D', subtitle: 'Race, puzzles & play' },
-  { id: 'creative', title: 'Creative', emoji: '🎨', color: '#FF9A3C', subtitle: 'Build fun pictures' },
+  { id: 'creative', title: 'Creative', emoji: '🎨', color: '#FF9A3C', subtitle: 'Talking pet & create' },
   { id: 'story', title: 'Good Habits', emoji: '🌟', color: '#9B7BFF', subtitle: 'Brush, sleep & more' },
 ];
 
@@ -58,7 +58,8 @@ export const GAMES: GameDef[] = [
   { id: 'sort_category', title: 'Sort It', emoji: '📦', world: 'thinking', route: 'SortCategory', blurb: 'Put things away', kind: 'quiz' },
   { id: 'cartoon_race', title: 'Cartoon Race', emoji: '🏎️', world: 'thinking', route: 'CartoonRace', blurb: 'Dodge & collect stars', kind: 'quiz' },
   { id: 'tap_sprint', title: 'Tap Sprint', emoji: '🏃', world: 'thinking', route: 'TapSprint', blurb: 'Tap GO to win!', kind: 'quiz' },
-  // Creative — builder-style only (like Shape Builder)
+  // Creative — Talking Tom–style pet + builders
+  { id: 'talking_momo', title: 'Talking Momo', emoji: '🐱', world: 'creative', route: 'TalkingMomo', blurb: 'Poke, talk, feed & care', kind: 'quiz' },
   { id: 'create_shapes', title: 'Build a Picture', emoji: '🧱', world: 'creative', route: 'ShapeBuilder', blurb: 'Finish with shapes', kind: 'learn', params: { pack: 'shapes' } },
   { id: 'create_face', title: 'Happy Face', emoji: '😊', world: 'creative', route: 'ShapeBuilder', blurb: 'Build a smile', kind: 'learn', params: { pack: 'faces' } },
   { id: 'create_plate', title: 'Yummy Plate', emoji: '🍽️', world: 'creative', route: 'ShapeBuilder', blurb: 'Build a meal', kind: 'learn', params: { pack: 'food' } },

@@ -35,6 +35,7 @@ export type RootStackParamList = {
   SortCategory: undefined;
   CartoonRace: undefined;
   TapSprint: undefined;
+  TalkingMomo: undefined;
   Coloring: undefined;
   MyWorldCreator: undefined;
   StoryPlay: { habitId?: string } | undefined;

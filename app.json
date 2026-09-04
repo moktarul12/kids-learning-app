@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kiddo",
     "slug": "kiddoo",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -22,7 +22,7 @@
         "backgroundImage": "./assets/android-icon-background.png"
       },
       "package": "com.dromominds.kiddoo",
-      "versionCode": 8,
+      "versionCode": 9,
       "predictiveBackGestureEnabled": false
     },
     "web": {

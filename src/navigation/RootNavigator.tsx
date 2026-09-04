@@ -56,6 +56,7 @@ import {
   CartoonRaceScreen,
   TapSprintScreen,
 } from '../screens/games/RacingGames';
+import { TalkingMomoScreen } from '../screens/games/TalkingMomoGame';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -168,6 +169,7 @@ export function RootNavigator() {
         <Stack.Screen name="SortCategory" component={SortCategoryScreen} />
         <Stack.Screen name="CartoonRace" component={CartoonRaceScreen} />
         <Stack.Screen name="TapSprint" component={TapSprintScreen} />
+        <Stack.Screen name="TalkingMomo" component={TalkingMomoScreen} />
         <Stack.Screen name="Coloring" component={ColoringScreen} />
         <Stack.Screen name="MyWorldCreator" component={MyWorldCreatorScreen} />
         <Stack.Screen name="StoryPlay" component={StoryPlayScreen} />
